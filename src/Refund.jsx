@@ -6,7 +6,7 @@ import { Show, createEffect, createSignal } from "solid-js";
 import BlockExplorer from "./components/BlockExplorer";
 import RefundEta from "./components/RefundEta";
 import SwapList from "./components/SwapList";
-import { fetcher, refund, refundAddressChange } from "./helper";
+import { fetcher, getApiUrl, refund, refundAddressChange } from "./helper";
 import t from "./i18n";
 import {
     refundTx,
@@ -99,7 +99,7 @@ const Refund = () => {
         if (!valid()) return;
         const refundInfo = refundJson();
         fetcher(
-            "/getswaptransaction",
+            getApiUrl("/getswaptransaction", refundInfo.asset),
             async (data) => {
                 if (data.timeoutEta) {
                     setTimeoutEta(data.timeoutEta * 1000);
@@ -148,7 +148,7 @@ const Refund = () => {
             )
             .map((swap) => {
                 fetcher(
-                    "/swapstatus",
+                    getApiUrl("/swapstatus", swap.asset),
                     (status) => {
                         if (
                             !updateSwapStatus(swap.id, status.status) &&
@@ -165,7 +165,7 @@ const Refund = () => {
 
                             // Make sure coins were locked for the swap with status "swap.expired"
                             fetcher(
-                                "/getswaptransaction",
+                                getApiUrl("/getswaptransaction", swap.asset),
                                 () => {
                                     addToRefundableSwaps(swap);
                                 },

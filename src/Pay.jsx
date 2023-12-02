@@ -5,11 +5,10 @@ import { Show, createEffect, createSignal, onCleanup } from "solid-js";
 import BlockExplorer from "./components/BlockExplorer";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { RBTC } from "./consts";
-import { fetcher } from "./helper";
+import { fetcher, getApiUrl } from "./helper";
 import t from "./i18n";
 import {
     setFailureReason,
-    setReverse,
     setSwap,
     setSwapStatus,
     setSwapStatusTransaction,
@@ -47,9 +46,8 @@ const Pay = () => {
             if (currentSwap) {
                 log.debug("selecting swap", currentSwap);
                 setSwap(currentSwap);
-                setReverse(currentSwap.reverse);
                 fetcher(
-                    "/swapstatus",
+                    getApiUrl("/swapstatus", currentSwap.asset),
                     (data) => {
                         setSwapStatus(data.status);
                         setSwapStatusTransaction(data.transaction);

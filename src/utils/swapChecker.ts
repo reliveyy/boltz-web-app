@@ -34,9 +34,10 @@ export const swapChecker = () => {
         log.debug(`subscribing to SSE of swap`, activeSwap.id);
         activeStreamId = activeSwap.id;
         activeSwapStream = handleStream(
-            `${getApiUrl(activeSwap.asset)}/streamswapstatus?id=${
-                activeSwap.id
-            }`,
+            getApiUrl(
+                `/streamswapstatus?id=${activeSwap.id}`,
+                activeSwap.asset,
+            ),
             (data) => {
                 setSwapStatusAndClaim(data, activeSwap);
             },
@@ -77,7 +78,7 @@ const runSwapCheck = async () => {
     for (const swap of swapsToCheck) {
         await new Promise<void>((resolve) => {
             fetcher(
-                "/swapstatus",
+                getApiUrl("/swapstatus", swap.asset),
                 (data) => {
                     setSwapStatusAndClaim(data, swap);
                     resolve();

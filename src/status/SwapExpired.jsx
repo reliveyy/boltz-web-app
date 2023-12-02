@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import log from "loglevel";
 import { Show, createEffect, createSignal } from "solid-js";
 
-import fetcher, { refund, refundAddressChange } from "../helper";
+import fetcher, { getApiUrl, refund, refundAddressChange } from "../helper";
 import t from "../i18n";
 import {
     failureReason,
@@ -19,7 +19,7 @@ const SwapExpired = () => {
     createEffect(() => {
         setTransactionToRefund(null);
         fetcher(
-            "/getswaptransaction",
+            getApiUrl("/getswaptransaction", swap().asset),
             (res) => {
                 log.debug(`got swap transaction for ${swap().id}`);
                 setTransactionToRefund(res);

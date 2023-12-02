@@ -16,7 +16,7 @@ import { pairs } from "./config";
 import { BTC, RBTC } from "./consts";
 import { ECPair } from "./ecpair/ecpair";
 import {
-    asset,
+    config,
     ref,
     refundAddress,
     setConfig,
@@ -98,14 +98,13 @@ export const errorHandler = (error) => {
     }
 };
 
-export const getApiUrl = (asset) => {
+export const getApiUrl = (url, asset) => {
     const pair = pairs[`${asset}/BTC`];
     if (pair) {
-        return pair.apiUrl;
+        return pair.apiUrl + url;
     }
-
     log.error(`no pair found for ${asset}; falling back to ${BTC}`);
-    return getApiUrl(BTC);
+    return getApiUrl(url, BTC);
 };
 
 export const fetcher = (url, cb, params = null, errorCb = errorHandler) => {
@@ -120,8 +119,7 @@ export const fetcher = (url, cb, params = null, errorCb = errorHandler) => {
             body: JSON.stringify(params),
         };
     }
-    const apiUrl = getApiUrl(asset()) + url;
-    fetch(apiUrl, opts).then(checkResponse).then(cb).catch(errorCb);
+    fetch(url, opts).then(checkResponse).then(cb).catch(errorCb);
 };
 
 export const checkForFailed = (swap, data) => {
@@ -132,7 +130,7 @@ export const checkForFailed = (swap, data) => {
         const id = swap.id;
 
         fetcher(
-            "/getswaptransaction",
+            getApiUrl("/getswaptransaction", swap.asset),
             (data) => {
                 if (swap.asset !== RBTC && !data.transactionHex) {
                     log.error("no mempool tx found");
@@ -233,7 +231,7 @@ export async function refund(swap, t) {
 
     log.debug("refund_tx", refundTransaction);
     fetcher(
-        "/broadcasttransaction",
+        getApiUrl("/broadcasttransaction", swap.asset),
         (data) => {
             log.debug("refund result:", data);
             if (data.transactionId) {
@@ -294,7 +292,7 @@ export async function refund(swap, t) {
 
 export async function getfeeestimation(swap) {
     return new Promise((resolve) => {
-        fetcher("/getfeeestimation", (data) => {
+        fetcher(getApiUrl("/getfeeestimation", swap.asset), (data) => {
             log.debug("getfeeestimation: ", data);
             let asset = swap.asset;
             resolve(data[asset]);
@@ -380,7 +378,7 @@ export const claim = async (swap) => {
     ).toHex();
     log.debug("claim_tx", claimTransaction);
     fetcher(
-        "/broadcasttransaction",
+        getApiUrl("/broadcasttransaction", swap.asset),
         (data) => {
             log.debug("claim result:", data);
             if (data.transactionId) {
@@ -399,7 +397,7 @@ export const claim = async (swap) => {
 
 export const fetchPairs = () => {
     fetcher(
-        "/getpairs",
+        getApiUrl("/getpairs", BTC),
         (data) => {
             log.debug("getpairs", data);
             setOnline(true);
@@ -414,13 +412,13 @@ export const fetchPairs = () => {
     return false;
 };
 
-export const feeCheck = async (notification) => {
+export const feeCheck = async (notification, asset) => {
     return new Promise((resolve) => {
         fetcher(
-            "/getpairs",
+            getApiUrl("/getpairs", BTC),
             (data) => {
                 log.debug("getpairs", data);
-                if (feeChecker(data.pairs)) {
+                if (feeChecker(config(), data.pairs, asset)) {
                     // amounts matches and fees are ok
                     resolve(true);
                 } else {

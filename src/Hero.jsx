@@ -7,7 +7,8 @@ import bitcoin from "./assets/bitcoin-icon.svg";
 import lightning from "./assets/lightning-icon.svg";
 import liquid from "./assets/liquid-icon.svg";
 import { ambossUrl } from "./config";
-import { fetcher } from "./helper";
+import { BTC } from "./consts";
+import { fetcher, getApiUrl } from "./helper";
 import t from "./i18n";
 import "./style/hero.scss";
 
@@ -36,7 +37,7 @@ export const Hero = () => {
         window.open(ambossUrl, "_blank");
     };
 
-    fetcher("/nodestats", (data) => {
+    fetcher(getApiUrl("/nodestats", BTC), (data) => {
         log.debug("nodestats", data);
         setNodeStats(data.nodes.BTC);
     });

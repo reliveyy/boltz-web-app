@@ -1,17 +1,12 @@
 import { makePersisted } from "@solid-primitives/storage";
-import { createEffect, createRoot, createSignal } from "solid-js";
+import { createSignal } from "solid-js";
 
-import { pairs } from "./config";
-import { LN, sideSend } from "./consts";
+import { sideSend } from "./consts";
 import { isMobile } from "./helper";
-
-const defaultSelection = Object.keys(pairs)[0].split("/")[0];
 
 // ui
 export const [assetSelect, setAssetSelect] = createSignal(false);
 export const [assetSelected, setAssetSelected] = createSignal(null);
-export const [asset, setAsset] = createSignal(defaultSelection);
-export const [reverse, setReverse] = createSignal(true);
 
 export const [config, setConfig] = createSignal(0);
 
@@ -88,14 +83,6 @@ export const [swaps, setSwaps] = makePersisted(
     },
 );
 
-export const [assetReceive, setAssetReceive] = makePersisted(
-    createSignal(defaultSelection),
-    { name: "assetReceive" },
-);
-export const [assetSend, setAssetSend] = makePersisted(createSignal(LN), {
-    name: "assetSend",
-});
-
 // validation
 export const [valid, setValid] = createSignal(false);
 export const [invoiceValid, setInvoiceValid] = createSignal(false);
@@ -105,15 +92,3 @@ export const [sendAmountValid, setSendAmountValid] = createSignal(true);
 // notification
 export const [notification, setNotification] = createSignal("");
 export const [notificationType, setNotificationType] = createSignal("");
-
-// effects
-createRoot(() => {
-    createEffect(() => setReverse(assetReceive() !== LN));
-    [assetSend, assetReceive].forEach((signal) => {
-        createEffect(() => {
-            if (signal() !== LN) {
-                setAsset(signal());
-            }
-        });
-    });
-});

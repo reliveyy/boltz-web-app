@@ -1,13 +1,16 @@
 import { BigNumber } from "bignumber.js";
 
-import { boltzFee, minerFee, reverse } from "../signals";
+import { boltzFee, minerFee } from "../signals";
 
-const bigRound = (big) => {
+const bigRound = (big: BigNumber) => {
     return big.integerValue(BigNumber.ROUND_CEIL);
 };
 
-export const calculateReceiveAmount = (sendAmount) => {
-    const receiveAmount = reverse()
+export const calculateReceiveAmount = (
+    sendAmount: number,
+    reverse: boolean,
+) => {
+    const receiveAmount = reverse
         ? BigNumber(sendAmount)
               .minus(bigRound(BigNumber(sendAmount).times(boltzFee()).div(100)))
               .minus(minerFee())
@@ -17,14 +20,17 @@ export const calculateReceiveAmount = (sendAmount) => {
     return Math.max(Math.floor(receiveAmount.toNumber()), 0);
 };
 
-export const calculateBoltzFeeOnSend = (sendAmount) => {
-    let fee;
+export const calculateBoltzFeeOnSend = (
+    sendAmount: number,
+    reverse: boolean,
+) => {
+    let fee: BigNumber;
 
-    if (reverse()) {
+    if (reverse) {
         fee = bigRound(BigNumber(sendAmount).times(boltzFee()).div(100));
     } else {
         fee = BigNumber(sendAmount)
-            .minus(calculateReceiveAmount(sendAmount))
+            .minus(calculateReceiveAmount(sendAmount, reverse))
             .minus(minerFee());
 
         if (sendAmount < minerFee()) {
@@ -35,8 +41,11 @@ export const calculateBoltzFeeOnSend = (sendAmount) => {
     return Math.ceil(fee.toNumber());
 };
 
-export const calculateSendAmount = (receiveAmount) => {
-    return reverse()
+export const calculateSendAmount = (
+    receiveAmount: number,
+    reverse: boolean,
+) => {
+    return reverse
         ? Math.ceil(
               BigNumber(receiveAmount)
                   .plus(minerFee())

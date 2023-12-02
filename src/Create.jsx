@@ -11,15 +11,13 @@ import Fees from "./components/Fees";
 import InvoiceInput from "./components/InvoiceInput";
 import Reverse from "./components/Reverse";
 import { RBTC, sideReceive, sideSend } from "./consts";
+import { useCreateContext } from "./context/Create";
 import t from "./i18n";
 import {
     addressValid,
     amountChanged,
-    asset,
-    assetReceive,
     assetSelect,
     assetSelected,
-    assetSend,
     boltzFee,
     denomination,
     invoiceValid,
@@ -28,12 +26,10 @@ import {
     minimum,
     receiveAmount,
     receiveAmountFormatted,
-    reverse,
     sendAmount,
     sendAmountFormatted,
     sendAmountValid,
     setAmountChanged,
-    setInvoice,
     setReceiveAmount,
     setReceiveAmountFormatted,
     setSendAmount,
@@ -54,6 +50,8 @@ import { enableWebln } from "./utils/webln";
 
 const Create = () => {
     let receiveAmountRef, sendAmountRef;
+
+    const { asset, assetReceive, assetSend, reverse, setInvoice } = useCreateContext();
 
     const changeReceiveAmount = (e) => {
         const amount = e.currentTarget.value.trim();

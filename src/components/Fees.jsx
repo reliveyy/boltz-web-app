@@ -2,15 +2,14 @@ import { Show, createEffect } from "solid-js";
 
 import btcSvg from "../assets/btc.svg";
 import satSvg from "../assets/sat.svg";
+import { useCreateContext } from "../context/Create";
 import { fetchPairs, isMobile } from "../helper";
 import t from "../i18n";
 import {
-    asset,
     boltzFee,
     config,
     denomination,
     minerFee,
-    reverse,
     sendAmount,
     setBoltzFee,
     setDenomination,
@@ -25,6 +24,8 @@ import {
 import { formatAmount } from "../utils/denomination";
 
 const Fees = () => {
+    const { asset, reverse } = useCreateContext();
+
     createEffect(() => {
         const cfg = config()[`${asset()}/BTC`];
 

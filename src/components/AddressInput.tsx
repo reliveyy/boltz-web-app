@@ -4,19 +4,20 @@ import { decodeAddress } from "../compat";
 import { RBTC } from "../consts";
 import t from "../i18n";
 import {
-    asset,
-    reverse,
     sendAmountValid,
     setAddressValid,
     setOnchainAddress,
 } from "../signals";
 import { extractAddress } from "../utils/invoice";
 import { setButtonLabel } from "./CreateButton";
+import { useCreateContext } from "../context/Create";
 
 const AddressInput = () => {
-    let inputRef: HTMLInputElement;
 
-    const validateAddress = (input: HTMLInputElement) => {
+    let inputRef: HTMLInputElement;
+    const { asset, reverse } = useCreateContext();
+
+    const validateAddress = (input: EventTarget & HTMLInputElement) => {
         const inputValue = input.value.trim();
         const address = extractAddress(inputValue);
 

@@ -5,19 +5,18 @@ import log from "loglevel";
 import { createEffect, createMemo, createSignal } from "solid-js";
 
 import { RBTC } from "../consts";
+import { useCreateContext } from "../context/Create";
 import { useWeb3Signer } from "../context/Web3";
 import { ECPair } from "../ecpair/ecpair";
 import { feeCheck, fetcher } from "../helper";
 import t from "../i18n";
 import {
-    asset,
     config,
     invoice,
     lnurl,
     onchainAddress,
     online,
     receiveAmount,
-    reverse,
     sendAmount,
     sendAmountValid,
     setAddressValid,
@@ -47,6 +46,7 @@ export const [buttonLabel, setButtonLabel] = createSignal<buttonLabelParams>({
 export const CreateButton = () => {
     const navigate = useNavigate();
     const { getEtherSwap } = useWeb3Signer();
+    const { asset, reverse } = useCreateContext();
 
     const [buttonDisable, setButtonDisable] = createSignal(true);
     const [buttonClass, setButtonClass] = createSignal("btn");
@@ -152,7 +152,7 @@ export const CreateButton = () => {
         await new Promise((resolve) => {
             fetcher(
                 "/createswap",
-                (data) => {
+                (data: any) => {
                     data.date = new Date().getTime();
                     data.reverse = reverse();
                     data.asset = asset();

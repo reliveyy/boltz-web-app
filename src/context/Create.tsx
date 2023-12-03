@@ -69,5 +69,12 @@ const CreateProvider = (props: { children: ResolvedChildren }) => {
     );
 };
 
-const useCreateContext = () => useContext(CreateContext);
+const useCreateContext = () => {
+    const context = useContext(CreateContext);
+    if (!context) {
+        throw new Error("useCreateContext: cannot find a CreateContext");
+    }
+    return context;
+};
+
 export { useCreateContext, CreateProvider };

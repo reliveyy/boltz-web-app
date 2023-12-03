@@ -1,11 +1,6 @@
 import { BigNumber } from "bignumber.js";
 
-import {
-    minerFee,
-    setBoltzFee,
-    setMinerFee,
-    setReverse,
-} from "../../src/signals";
+import { minerFee, setBoltzFee, setMinerFee } from "../../src/signals";
 import {
     calculateBoltzFeeOnSend,
     calculateReceiveAmount,
@@ -14,13 +9,11 @@ import {
 
 describe("Calculate amounts", () => {
     const setSwapFees = () => {
-        setReverse(false);
         setMinerFee(147);
         setBoltzFee(0.1);
     };
 
     const setReverseSwapFees = () => {
-        setReverse(true);
         setMinerFee(428);
         setBoltzFee(0.25);
     };
@@ -39,20 +32,26 @@ describe("Calculate amounts", () => {
         `(
             "calculate amounts $sendAmount <-> $receiveAmount",
             ({ sendAmount, receiveAmount }) => {
-                expect(calculateReceiveAmount(sendAmount)).toEqual(
+                expect(calculateReceiveAmount(sendAmount, false)).toEqual(
                     receiveAmount,
                 );
-                expect(calculateSendAmount(receiveAmount)).toEqual(sendAmount);
+                expect(calculateSendAmount(receiveAmount, false)).toEqual(
+                    sendAmount,
+                );
             },
         );
 
         test("should return correct types", () => {
-            expect(typeof calculateReceiveAmount(1000000)).toEqual("number");
-            expect(typeof calculateSendAmount(1000000)).toEqual("number");
+            expect(typeof calculateReceiveAmount(1000000, false)).toEqual(
+                "number",
+            );
+            expect(typeof calculateSendAmount(1000000, false)).toEqual(
+                "number",
+            );
         });
 
         test("should not return negative numbers", () => {
-            expect(calculateReceiveAmount(0)).toEqual(0);
+            expect(calculateReceiveAmount(0, false)).toEqual(0);
         });
     });
 
@@ -70,20 +69,24 @@ describe("Calculate amounts", () => {
         `(
             "calculate amounts $sendAmount <-> $receiveAmount",
             ({ sendAmount, receiveAmount }) => {
-                expect(calculateReceiveAmount(sendAmount)).toEqual(
+                expect(calculateReceiveAmount(sendAmount, true)).toEqual(
                     receiveAmount,
                 );
-                expect(calculateSendAmount(receiveAmount)).toEqual(sendAmount);
+                expect(calculateSendAmount(receiveAmount, true)).toEqual(
+                    sendAmount,
+                );
             },
         );
 
         test("should return correct types", () => {
-            expect(typeof calculateReceiveAmount(1000000)).toEqual("number");
-            expect(typeof calculateSendAmount(1000000)).toEqual("number");
+            expect(typeof calculateReceiveAmount(1000000, true)).toEqual(
+                "number",
+            );
+            expect(typeof calculateSendAmount(1000000, true)).toEqual("number");
         });
 
         test("should not return negative numbers", () => {
-            expect(calculateReceiveAmount(0)).toEqual(0);
+            expect(calculateReceiveAmount(0, true)).toEqual(0);
         });
     });
 
@@ -100,10 +103,10 @@ describe("Calculate amounts", () => {
             ({ sendAmount, receiveAmount, fee }) => {
                 setSwapFees();
 
-                expect(calculateBoltzFeeOnSend(sendAmount)).toEqual(fee);
+                expect(calculateBoltzFeeOnSend(sendAmount, false)).toEqual(fee);
                 expect(
                     BigNumber(sendAmount)
-                        .minus(calculateBoltzFeeOnSend(sendAmount))
+                        .minus(calculateBoltzFeeOnSend(sendAmount, false))
                         .minus(minerFee())
                         .toNumber(),
                 ).toEqual(receiveAmount);
@@ -121,10 +124,10 @@ describe("Calculate amounts", () => {
             ({ sendAmount, receiveAmount, fee }) => {
                 setReverseSwapFees();
 
-                expect(calculateBoltzFeeOnSend(sendAmount)).toEqual(fee);
+                expect(calculateBoltzFeeOnSend(sendAmount, true)).toEqual(fee);
                 expect(
                     BigNumber(sendAmount)
-                        .minus(calculateBoltzFeeOnSend(sendAmount))
+                        .minus(calculateBoltzFeeOnSend(sendAmount, true))
                         .minus(minerFee())
                         .toNumber(),
                 ).toEqual(receiveAmount);
@@ -134,15 +137,16 @@ describe("Calculate amounts", () => {
         test("should calculate negative fees", () => {
             setSwapFees();
             setBoltzFee(-0.1);
-            expect(calculateBoltzFeeOnSend(1_000_000)).toEqual(-1000);
+            expect(calculateBoltzFeeOnSend(1_000_000, false)).toEqual(-1000);
         });
 
         test("should return correct types", () => {
-            setReverse(true);
-            expect(typeof calculateBoltzFeeOnSend(1000000)).toEqual("number");
-
-            setReverse(false);
-            expect(typeof calculateBoltzFeeOnSend(1000000)).toEqual("number");
+            expect(typeof calculateBoltzFeeOnSend(1000000, true)).toEqual(
+                "number",
+            );
+            expect(typeof calculateBoltzFeeOnSend(1000000, false)).toEqual(
+                "number",
+            );
         });
     });
 });

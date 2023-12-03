@@ -38,10 +38,9 @@ class Server {
     public address: string | undefined;
     private server: HttpsServer | undefined;
 
-    public start = () => {
-        this.server = createServer((req, res) => {
+    public start = (id: string) => {
+        this.server = createServer((_, res) => {
             this.connectCount += 1;
-            const id = req.url.split("=")[1];
             this.connections[id] = res;
 
             res.on("close", () => {
@@ -65,7 +64,7 @@ class Server {
     public sendMessage = (id: string, message: string) => {
         const con = this.connections[id];
         if (con === undefined) {
-            throw "no connection for ID";
+            throw `no connection for ID: ${id}`;
         }
 
         con.write(`data: ${message}\n\n`);
@@ -78,7 +77,7 @@ describe("swapChecker", () => {
     const server = new Server();
 
     beforeEach(() => {
-        server.start();
+        server.start(swaps[0].id);
         vi.resetAllMocks();
         apiUrl = server.address;
     });

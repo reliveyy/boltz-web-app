@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 
 import AddressInput from "../../src/components/AddressInput";
 import { BTC, LBTC } from "../../src/consts";
+import { CreateProvider, useCreateContext } from "../../src/context/Create";
 import t from "../../src/i18n";
 import * as signals from "../../src/signals";
 
@@ -27,7 +28,8 @@ describe("AddressInput", () => {
             const setAddressValid = vi.spyOn(signals, "setAddressValid");
             const setOnchainAddress = vi.spyOn(signals, "setOnchainAddress");
 
-            signals.setAsset(network);
+            const { setAsset } = useCreateContext();
+            setAsset(network);
 
             render(() => <AddressInput />);
 

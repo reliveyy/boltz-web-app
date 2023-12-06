@@ -1,14 +1,13 @@
 import { createEffect, on } from "solid-js";
 
 import { RBTC } from "../consts";
+import { useCreateContext } from "../context/Create";
 import t from "../i18n";
 import {
-    asset,
     denomination,
     invoice,
     receiveAmount,
     receiveAmountFormatted,
-    reverse,
     sendAmount,
     sendAmountValid,
     setInvoice,
@@ -25,6 +24,8 @@ import { setButtonLabel } from "./CreateButton";
 const InvoiceInput = () => {
     let inputRef: HTMLTextAreaElement;
 
+    const { asset, reverse } = useCreateContext();
+
     const validate = (input: HTMLTextAreaElement) => {
         const inputValue = extractInvoice(input.value.trim());
         try {
@@ -33,17 +34,17 @@ const InvoiceInput = () => {
                 setLnurl(inputValue);
             } else {
                 const sats = validateInvoice(inputValue);
-                setReceiveAmount(sats);
-                setSendAmount(calculateSendAmount(sats));
+                setReceiveAmount(BigInt(sats));
+                setSendAmount(BigInt(calculateSendAmount(sats, reverse())));
                 setInvoice(inputValue);
-                setLnurl(false);
+                setLnurl("");
                 setInvoiceValid(true);
             }
             input.setCustomValidity("");
             input.classList.remove("invalid");
         } catch (e) {
             setInvoiceValid(false);
-            setLnurl(false);
+            setLnurl("");
             input.setCustomValidity(t(e.message));
             setButtonLabel({ key: e.message });
             input.classList.add("invalid");

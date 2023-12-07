@@ -1,28 +1,23 @@
 import log from "loglevel";
 
-import { getAddress, getNetwork } from "./compat";
 import { pairs } from "./config";
 import { BTC, RBTC } from "./consts";
 import {
     config,
     ref,
     setConfig,
-    setFailureReason,
     setNotification,
     setNotificationType,
     setOnline,
     setRef,
-    setRefundAddress,
     setSwaps,
     setTimeoutBlockheight,
     setTimeoutEta,
     swap,
     swaps,
 } from "./signals";
-import { claim } from "./utils/claim";
 import { feeChecker } from "./utils/feeChecker";
 import { checkResponse } from "./utils/http";
-import { swapStatusPending, updateSwapStatus } from "./utils/swapStatus";
 
 export const isIos = !!navigator.userAgent.match(/iphone|ipad/gi) || false;
 export const isMobile =
@@ -185,22 +180,6 @@ export const feeCheck = async (notification: string, asset: string) => {
             },
         );
     });
-};
-
-export const refundAddressChange = (e: Event, asset: string) => {
-    const input = e.currentTarget as HTMLInputElement;
-    const inputValue = input.value.trim();
-    try {
-        getAddress(asset).toOutputScript(inputValue, getNetwork(asset));
-        input.setCustomValidity("");
-        setRefundAddress(inputValue);
-        return true;
-    } catch (e) {
-        log.warn("parsing refund address failed", e);
-        input.setCustomValidity("invalid address");
-    }
-
-    return false;
 };
 
 export const updateSwaps = (cb: Function) => {

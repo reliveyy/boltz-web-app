@@ -6,7 +6,7 @@ import { Show, createEffect, createSignal } from "solid-js";
 import BlockExplorer from "./components/BlockExplorer";
 import RefundEta from "./components/RefundEta";
 import SwapList from "./components/SwapList";
-import { fetcher, getApiUrl, refundAddressChange } from "./helper";
+import { fetcher, getApiUrl } from "./helper";
 import t from "./i18n";
 import {
     refundTx,

@@ -1,3 +1,4 @@
+import { detectSwap } from "boltz-core";
 import log from "loglevel";
 
 import {
@@ -7,6 +8,7 @@ import {
     getTransaction,
     setup,
 } from "../compat";
+import { ECPair } from "../ecpair/ecpair";
 import { fetcher, getApiUrl, parseBlindingKey } from "../helper";
 import t from "../i18n";
 import {
@@ -14,10 +16,53 @@ import {
     setNotificationType,
     setRefundTx,
     setSwap,
+    setSwaps,
     swaps,
 } from "../signals";
 
-export async function refund(swap: any) {
+const refundErrorResponseHandler = (error: any) => {
+    console.log(error);
+    setNotificationType("error");
+    if (typeof error.json === "function") {
+        error
+            .json()
+            .then((jsonError: any) => {
+                let msg = jsonError.error;
+                if (
+                    msg === "bad-txns-inputs-missingorspent" ||
+                    msg === "Transaction already in block chain"
+                ) {
+                    msg = t("already_refunded");
+                } else if (msg === "mandatory-script-verify-flag-failed") {
+                    msg = t("locktime_not_satisfied");
+                }
+                setNotification(msg);
+            })
+            .catch((genericError: any) => {
+                log.debug("generic error", genericError);
+                log.error(genericError);
+                setNotification(error.statusText);
+            });
+    } else {
+        setNotification(error.message);
+    }
+};
+
+export async function getfeeestimation(asset: string) {
+    return new Promise((resolve) => {
+        fetcher("/getfeeestimation", (data) => {
+            log.debug("getfeeestimation: ", data);
+            resolve(data[asset]);
+        });
+    });
+}
+
+export async function refund(
+    swap: any,
+    refundAddress: string,
+    txHex: string,
+    timeoutBlockHeight: number,
+) {
     let output: any;
 
     setRefundTx("");
@@ -27,7 +72,7 @@ export async function refund(swap: any) {
     const asset_name = swap.asset;
 
     try {
-        output = decodeAddress(asset_name, refundAddress());
+        output = decodeAddress(asset_name, refundAddress);
     } catch (e) {
         log.error(e);
         setNotificationType("error");
@@ -37,14 +82,11 @@ export async function refund(swap: any) {
     log.info("refunding swap: ", swap.id);
     let [_, fees] = await Promise.all([setup(), getfeeestimation(swap)]);
 
-    const txToRefund = transactionToRefund();
     const Transaction = getTransaction(asset_name);
-    const constructRefundTransaction =
-        getConstructRefundTransaction(asset_name);
     const net = getNetwork(asset_name);
     const assetHash = asset_name === "L-BTC" ? net.assetHash : undefined;
 
-    let tx = Transaction.fromHex(txToRefund.transactionHex);
+    let tx = Transaction.fromHex(txHex);
     let script = Buffer.from(swap.redeemScript, "hex");
     log.debug("script", script);
     let swapOutput = detectSwap(script, tx);
@@ -53,7 +95,13 @@ export async function refund(swap: any) {
         Buffer.from(swap.privateKey, "hex"),
     );
     log.debug("privkey", private_key);
+
+    // TODO: fix
+    const constructRefundTransaction =
+        getConstructRefundTransaction(asset_name);
+
     const refundTransaction = constructRefundTransaction(
+        swap,
         [
             {
                 ...swapOutput,
@@ -64,7 +112,7 @@ export async function refund(swap: any) {
             },
         ],
         output.script,
-        txToRefund.timeoutBlockHeight,
+        timeoutBlockHeight,
         fees,
         true, // rbf
         assetHash,
@@ -100,35 +148,7 @@ export async function refund(swap: any) {
             currency: asset_name,
             transactionHex: refundTransaction,
         },
-        (error: any) => {
-            console.log(error);
-            setNotificationType("error");
-            if (typeof error.json === "function") {
-                error
-                    .json()
-                    .then((jsonError: any) => {
-                        let msg = jsonError.error;
-                        if (
-                            msg === "bad-txns-inputs-missingorspent" ||
-                            msg === "Transaction already in block chain"
-                        ) {
-                            msg = t("already_refunded");
-                        } else if (
-                            msg === "mandatory-script-verify-flag-failed"
-                        ) {
-                            msg = t("locktime_not_satisfied");
-                        }
-                        setNotification(msg);
-                    })
-                    .catch((genericError: any) => {
-                        log.debug("generic error", genericError);
-                        log.error(genericError);
-                        setNotification(error.statusText);
-                    });
-            } else {
-                setNotification(error.message);
-            }
-        },
+        refundErrorResponseHandler,
     );
     return true;
 }

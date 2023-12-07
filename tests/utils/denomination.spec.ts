@@ -1,3 +1,5 @@
+import { beforeAll, describe, expect, test } from "vitest";
+
 import { setDenomination, setMaximum } from "../../src/signals";
 import {
     calculateDigits,
@@ -19,8 +21,7 @@ describe("denomination utils", () => {
         `(
             "convert $amount in $denomination",
             ({ denomination, amount, converted }) => {
-                setDenomination(denomination);
-                expect(convertAmount(amount)).toEqual(converted);
+                expect(convertAmount(amount, denomination)).toEqual(converted);
             },
         );
     });

@@ -1,26 +1,35 @@
-import { render } from "@solidjs/testing-library";
-import { describe, test } from "vitest";
+import { fireEvent, render, screen } from "@solidjs/testing-library";
+import { describe, expect, test } from "vitest";
 
 import Reverse from "../../src/components/Reverse";
-// import { BTC, LN } from "../../src/config";
-import { CreateProvider } from "../../src/context/Create";
+import { BTC, LN } from "../../src/consts";
+import { CreateProvider, useCreateContext } from "../../src/context/Create";
 
 describe("Reverse", () => {
     test("should reverse assets", async () => {
+        let signals: any;
+
+        const TestComponent = () => {
+            signals = useCreateContext();
+            return "";
+        };
+
         render(() => (
             <CreateProvider>
+                <TestComponent />
                 <Reverse />
             </CreateProvider>
         ));
 
-        // setAssetSend(BTC);
-        // setAssetReceive(LN);
-        // expect(reverse()).toEqual(true);
+        signals.setAssetSend(LN);
+        signals.setAssetReceive(BTC);
 
-        // fireEvent.click(flip);
+        expect(signals.reverse()).toEqual(true);
 
-        // expect(reverse()).toEqual(true);
-        // expect(assetSend()).toEqual(LN);
-        // expect(assetReceive()).toEqual(BTC);
+        fireEvent.click(await screen.findByTestId("flip"));
+
+        expect(signals.reverse()).toEqual(false);
+        expect(signals.assetSend()).toEqual(BTC);
+        expect(signals.assetReceive()).toEqual(LN);
     });
 });

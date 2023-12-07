@@ -12,7 +12,7 @@ const Reverse = () => {
     };
 
     return (
-        <div id="flip-assets" onClick={() => setDirection()}>
+        <div data-testid="flip" id="flip-assets" onClick={() => setDirection()}>
             <img src={arrowSvg} alt="flip assets" />
         </div>
     );

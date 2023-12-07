@@ -1,6 +1,6 @@
 import { Router } from "@solidjs/router";
 import { fireEvent, render, screen } from "@solidjs/testing-library";
-import { beforeAll, beforeEach, expect, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 
 import Create from "../../src/Create";
 import { sideReceive, sideSend } from "../../src/consts";
@@ -154,7 +154,7 @@ describe("Create", () => {
 
         expect(setReceiveAmount).toHaveBeenCalledTimes(1);
         expect(setReceiveAmount).toHaveBeenCalledWith(
-            calculateReceiveAmount(amount),
+            calculateReceiveAmount(amount, reverse()),
         );
     });
 });

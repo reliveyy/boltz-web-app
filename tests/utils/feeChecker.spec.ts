@@ -1,3 +1,5 @@
+import { describe, expect, test } from "vitest";
+
 import { BTC, LBTC } from "../../src/consts";
 import { feeChecker } from "../../src/utils/feeChecker";
 
@@ -59,7 +61,7 @@ const cfg = {
     },
 };
 
-const deepCopy = (value) => JSON.parse(JSON.stringify(value));
+const deepCopy = (value: any) => JSON.parse(JSON.stringify(value));
 
 describe("feeChecker", () => {
     test("same config should be valid", () => {

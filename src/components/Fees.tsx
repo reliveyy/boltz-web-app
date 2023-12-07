@@ -10,7 +10,6 @@ import {
     config,
     denomination,
     minerFee,
-    sendAmount,
     setBoltzFee,
     setDenomination,
     setMaximum,
@@ -24,7 +23,7 @@ import {
 import { formatAmount } from "../utils/denomination";
 
 const Fees = () => {
-    const { asset, reverse } = useCreateContext();
+    const { asset, reverse, sendAmount } = useCreateContext();
 
     createEffect(() => {
         const cfg = config()[`${asset()}/BTC`];
@@ -41,8 +40,10 @@ const Fees = () => {
                 setMinerFee(fee);
             }
 
-            const calculateLimit = (limit) => {
-                return reverse() ? limit : calculateSendAmount(limit);
+            const calculateLimit = (limit: any) => {
+                return reverse()
+                    ? limit
+                    : calculateSendAmount(limit, reverse());
             };
 
             setMinimum(calculateLimit(cfg.limits.minimal));
@@ -82,7 +83,13 @@ const Fees = () => {
                 <br />
                 {t("fee")} ({boltzFee()}%):{" "}
                 <span class="boltz-fee">
-                    {formatAmount(calculateBoltzFeeOnSend(sendAmount()), true)}
+                    {formatAmount(
+                        calculateBoltzFeeOnSend(
+                            Number(sendAmount()),
+                            reverse(),
+                        ),
+                        true,
+                    )}
                     <span
                         class="denominator"
                         data-denominator={denomination()}></span>

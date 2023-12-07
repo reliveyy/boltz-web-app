@@ -51,7 +51,8 @@ import { enableWebln } from "./utils/webln";
 const Create = () => {
     let receiveAmountRef, sendAmountRef;
 
-    const { asset, assetReceive, assetSend, reverse, setInvoice } = useCreateContext();
+    const { asset, assetReceive, assetSend, reverse, setInvoice } =
+        useCreateContext();
 
     const changeReceiveAmount = (e) => {
         const amount = e.currentTarget.value.trim();

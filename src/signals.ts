@@ -22,15 +22,7 @@ export const [maximum, setMaximum] = createSignal(0);
 
 // swaps
 export const [amountChanged, setAmountChanged] = createSignal(sideSend);
-export const [sendAmount, setSendAmount] = createSignal(BigInt(0));
-export const [receiveAmount, setReceiveAmount] = createSignal(BigInt(0));
-export const [sendAmountFormatted, setSendAmountFormatted] = createSignal(0);
-export const [receiveAmountFormatted, setReceiveAmountFormatted] =
-    createSignal(0);
 export const [refundAddress, setRefundAddress] = createSignal(null);
-export const [onchainAddress, setOnchainAddress] = createSignal("");
-export const [lnurl, setLnurl] = createSignal("");
-export const [invoice, setInvoice] = createSignal("");
 export const [swap, setSwap] = createSignal(null, {
     // To allow updating properties of the swap object without replacing it completely
     equals: () => false,
@@ -50,8 +42,8 @@ export const [i18n, setI18n] = createSignal(null);
 
 // To support the values created by the deprecated "createStorageSignal"
 const stringSerializer = {
-    serialize: (value) => value,
-    deserialize: (value) => value,
+    serialize: (value: any) => value,
+    deserialize: (value: any) => value,
 };
 
 export const [ref, setRef] = makePersisted(
@@ -82,12 +74,6 @@ export const [swaps, setSwaps] = makePersisted(
         name: "swaps",
     },
 );
-
-// validation
-export const [valid, setValid] = createSignal(false);
-export const [invoiceValid, setInvoiceValid] = createSignal(false);
-export const [addressValid, setAddressValid] = createSignal(false);
-export const [sendAmountValid, setSendAmountValid] = createSignal(true);
 
 // notification
 export const [notification, setNotification] = createSignal("");

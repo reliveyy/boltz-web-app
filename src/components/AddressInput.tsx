@@ -2,20 +2,20 @@ import { createEffect } from "solid-js";
 
 import { decodeAddress } from "../compat";
 import { RBTC } from "../consts";
+import { useCreateContext } from "../context/Create";
 import t from "../i18n";
-import {
-    sendAmountValid,
-    setAddressValid,
-    setOnchainAddress,
-} from "../signals";
 import { extractAddress } from "../utils/invoice";
 import { setButtonLabel } from "./CreateButton";
-import { useCreateContext } from "../context/Create";
 
 const AddressInput = () => {
-
     let inputRef: HTMLInputElement;
-    const { asset, reverse } = useCreateContext();
+    const {
+        asset,
+        reverse,
+        sendAmountValid,
+        setAddressValid,
+        setOnchainAddress,
+    } = useCreateContext();
 
     const validateAddress = (input: EventTarget & HTMLInputElement) => {
         const inputValue = input.value.trim();

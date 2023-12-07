@@ -12,23 +12,11 @@ import { feeCheck, fetcher } from "../helper";
 import t from "../i18n";
 import {
     config,
-    invoice,
-    lnurl,
-    onchainAddress,
     online,
-    receiveAmount,
-    sendAmount,
-    sendAmountValid,
-    setAddressValid,
-    setInvoice,
-    setInvoiceValid,
-    setLnurl,
     setNotification,
     setNotificationType,
-    setOnchainAddress,
     setSwaps,
     swaps,
-    valid,
     wasmSupported,
 } from "../signals";
 import { extractAddress, fetchLnurl } from "../utils/invoice";
@@ -46,16 +34,28 @@ export const [buttonLabel, setButtonLabel] = createSignal<buttonLabelParams>({
 export const CreateButton = () => {
     const navigate = useNavigate();
     const { getEtherSwap } = useWeb3Signer();
-    const { asset, reverse } = useCreateContext();
+    const {
+        asset,
+        invoice,
+        lnurl,
+        reverse,
+        setInvoice,
+        setLnurl,
+        receiveAmount,
+        sendAmountValid,
+        setOnchainAddress,
+        valid,
+        sendAmount,
+        onchainAddress,
+        setInvoiceValid,
+        setAddressValid,
+    } = useCreateContext();
 
     const [buttonDisable, setButtonDisable] = createSignal(true);
     const [buttonClass, setButtonClass] = createSignal("btn");
 
     const validateButtonDisable = () => {
-        return (
-            !valid() &&
-            !(lnurl() !== "" && lnurl() !== false && sendAmountValid())
-        );
+        return !valid() && !(lnurl() !== "" && sendAmountValid());
     };
 
     createEffect(() => {
@@ -85,16 +85,11 @@ export const CreateButton = () => {
     });
 
     const create = async () => {
-        if (
-            sendAmountValid() &&
-            !reverse() &&
-            lnurl() !== "" &&
-            lnurl() !== false
-        ) {
+        if (sendAmountValid() && !reverse() && lnurl() !== "") {
             try {
                 const inv = await fetchLnurl(lnurl(), Number(receiveAmount()));
                 setInvoice(inv);
-                setLnurl(false);
+                setLnurl("");
             } catch (e) {
                 setNotificationType("error");
                 setNotification(e);

@@ -19,18 +19,40 @@ const CreateContext = createContext<{
     setReverse: Setter<boolean>;
     invoice: Accessor<string>;
     setInvoice: Setter<string>;
+    lnurl: Accessor<string>;
+    setLnurl: Setter<string>;
+    onchainAddress: Accessor<string>;
+    setOnchainAddress: Setter<string>;
     asset: Accessor<string>;
     setAsset: Setter<string>;
     assetSend: Accessor<string>;
     setAssetSend: Setter<string>;
     assetReceive: Accessor<string>;
     setAssetReceive: Setter<string>;
+    valid: Accessor<boolean>;
+    setValid: Setter<boolean>;
+    invoiceValid: Accessor<boolean>;
+    setInvoiceValid: Setter<boolean>;
+    addressValid: Accessor<boolean>;
+    setAddressValid: Setter<boolean>;
+    sendAmountValid: Accessor<boolean>;
+    setSendAmountValid: Setter<boolean>;
+    sendAmount: Accessor<bigint>;
+    setSendAmount: Setter<bigint>;
+    receiveAmount: Accessor<bigint>;
+    setReceiveAmount: Setter<bigint>;
+    sendAmountFormatted: Accessor<number>;
+    setSendAmountFormatted: Setter<number>;
+    receiveAmountFormatted: Accessor<number>;
+    setReceiveAmountFormatted: Setter<number>;
 }>();
 
 const CreateProvider = (props: { children: ResolvedChildren }) => {
     const [asset, setAsset] = createSignal<string>(defaultSelection);
     const [reverse, setReverse] = createSignal<boolean>(true);
     const [invoice, setInvoice] = createSignal<string>("");
+    const [lnurl, setLnurl] = createSignal("");
+    const [onchainAddress, setOnchainAddress] = createSignal("");
 
     const [assetReceive, setAssetReceive] = makePersisted(
         createSignal(defaultSelection),
@@ -50,6 +72,18 @@ const CreateProvider = (props: { children: ResolvedChildren }) => {
         });
     });
 
+    // validation
+    const [valid, setValid] = createSignal(false);
+    const [invoiceValid, setInvoiceValid] = createSignal(false);
+    const [addressValid, setAddressValid] = createSignal(false);
+    const [sendAmountValid, setSendAmountValid] = createSignal(true);
+
+    // amounts
+    const [sendAmount, setSendAmount] = createSignal(BigInt(0));
+    const [receiveAmount, setReceiveAmount] = createSignal(BigInt(0));
+    const [sendAmountFormatted, setSendAmountFormatted] = createSignal(0);
+    const [receiveAmountFormatted, setReceiveAmountFormatted] = createSignal(0);
+
     return (
         <CreateContext.Provider
             value={{
@@ -57,12 +91,32 @@ const CreateProvider = (props: { children: ResolvedChildren }) => {
                 setReverse,
                 invoice,
                 setInvoice,
+                lnurl,
+                setLnurl,
+                onchainAddress,
+                setOnchainAddress,
                 asset,
                 setAsset,
                 assetSend,
                 setAssetSend,
                 assetReceive,
                 setAssetReceive,
+                valid,
+                setValid,
+                invoiceValid,
+                setInvoiceValid,
+                addressValid,
+                setAddressValid,
+                sendAmountValid,
+                setSendAmountValid,
+                sendAmount,
+                setSendAmount,
+                receiveAmount,
+                setReceiveAmount,
+                sendAmountFormatted,
+                setSendAmountFormatted,
+                receiveAmountFormatted,
+                setReceiveAmountFormatted,
             }}>
             {props.children}
         </CreateContext.Provider>

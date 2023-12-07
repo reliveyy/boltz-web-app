@@ -14,28 +14,15 @@ import { RBTC, sideReceive, sideSend } from "./consts";
 import { useCreateContext } from "./context/Create";
 import t from "./i18n";
 import {
-    addressValid,
     amountChanged,
     assetSelect,
     assetSelected,
     boltzFee,
     denomination,
-    invoiceValid,
     maximum,
     minerFee,
     minimum,
-    receiveAmount,
-    receiveAmountFormatted,
-    sendAmount,
-    sendAmountFormatted,
-    sendAmountValid,
     setAmountChanged,
-    setReceiveAmount,
-    setReceiveAmountFormatted,
-    setSendAmount,
-    setSendAmountFormatted,
-    setSendAmountValid,
-    setValid,
     webln,
 } from "./signals";
 import { calculateReceiveAmount, calculateSendAmount } from "./utils/calculate";
@@ -49,38 +36,60 @@ import {
 import { enableWebln } from "./utils/webln";
 
 const Create = () => {
-    let receiveAmountRef, sendAmountRef;
+    let receiveAmountRef: HTMLInputElement;
+    let sendAmountRef: HTMLInputElement;
 
-    const { asset, assetReceive, assetSend, reverse, setInvoice } =
-        useCreateContext();
+    const {
+        asset,
+        assetReceive,
+        assetSend,
+        addressValid,
+        reverse,
+        setInvoice,
+        invoiceValid,
+        receiveAmount,
+        receiveAmountFormatted,
+        sendAmount,
+        sendAmountFormatted,
+        sendAmountValid,
+        setReceiveAmount,
+        setReceiveAmountFormatted,
+        setSendAmount,
+        setSendAmountFormatted,
+        setSendAmountValid,
+        setValid,
+    } = useCreateContext();
 
-    const changeReceiveAmount = (e) => {
-        const amount = e.currentTarget.value.trim();
+    const changeReceiveAmount = (evt: InputEvent) => {
+        const target = evt.currentTarget as HTMLInputElement;
+        const amount = target.value.trim();
         const satAmount = convertAmount(Number(amount), denominations.sat);
-        const sendAmount = calculateSendAmount(satAmount);
+        const sendAmount = calculateSendAmount(satAmount, reverse());
         setAmountChanged(sideReceive);
         setReceiveAmount(BigInt(satAmount));
-        setSendAmount(sendAmount);
+        setSendAmount(BigInt(sendAmount));
         validateAmount();
-        e.currentTarget.setCustomValidity("");
-        e.currentTarget.classList.remove("invalid");
+        target.setCustomValidity("");
+        target.classList.remove("invalid");
     };
 
-    const changeSendAmount = (e) => {
-        const amount = e.currentTarget.value.trim();
+    const changeSendAmount = (evt: InputEvent) => {
+        const target = evt.currentTarget as HTMLInputElement;
+        const amount = target.value.trim();
         const satAmount = convertAmount(Number(amount), denominations.sat);
-        const receiveAmount = calculateReceiveAmount(satAmount);
+        const receiveAmount = calculateReceiveAmount(satAmount, reverse());
         setAmountChanged(sideSend);
         setSendAmount(BigInt(satAmount));
         setReceiveAmount(BigInt(receiveAmount));
         validateAmount();
-        e.currentTarget.setCustomValidity("");
-        e.currentTarget.classList.remove("invalid");
+        target.setCustomValidity("");
+        target.classList.remove("invalid");
     };
 
     const createWeblnInvoice = async () => {
         enableWebln(async () => {
             const amount = Number(receiveAmount());
+            // @ts-ignore
             const invoice = await window.webln.makeInvoice({ amount: amount });
             validateAmount();
             log.debug("created webln invoice", invoice);
@@ -88,20 +97,18 @@ const Create = () => {
         });
     };
 
-    const validateInput = (evt) => {
-        const theEvent = evt || window.event;
-        const input = evt.currentTarget;
-        let keycode = theEvent.keyCode || theEvent.which;
-        keycode = String.fromCharCode(keycode);
+    const validateInput = (evt: KeyboardEvent) => {
+        const input = evt.currentTarget as HTMLInputElement;
+        const keycode = evt.key;
+        debugger;
         const hasDot = input.value.includes(".");
         const regex = denomination() == "sat" || hasDot ? /[0-9]/ : /[0-9]|\./;
         if (!regex.test(keycode)) {
-            theEvent.returnValue = false;
-            if (theEvent.preventDefault) theEvent.preventDefault();
+            evt.preventDefault();
         }
     };
 
-    const validatePaste = (evt) => {
+    const validatePaste = (evt: ClipboardEvent) => {
         const clipboardData = evt.clipboardData || globalThis.clipboardData;
         const pastedData = clipboardData.getData("Text").trim();
         if (!getValidationRegex().test(pastedData)) {
@@ -111,10 +118,10 @@ const Create = () => {
     };
 
     const validateAmount = () => {
-        const setCustomValidity = (val, isZero) => {
+        const setCustomValidity = (msg: string, isZero: boolean = true) => {
             [sendAmountRef, receiveAmountRef].forEach((ref) => {
-                ref.setCustomValidity(val);
-                if (!isZero && val !== "") {
+                ref.setCustomValidity(msg);
+                if (!isZero && msg !== "") {
                     ref.classList.add("invalid");
                 } else {
                     ref.classList.remove("invalid");
@@ -142,12 +149,15 @@ const Create = () => {
         setSendAmountValid(true);
     };
 
-    const setAmount = (amount) => {
-        setSendAmount(amount);
-        setReceiveAmount(calculateReceiveAmount(amount));
+    const setAmount = (amount: number) => {
+        setSendAmount(BigInt(amount));
+        setReceiveAmount(BigInt(calculateReceiveAmount(amount, reverse())));
         validateAmount();
         sendAmountRef.focus();
     };
+
+
+
 
     onMount(() => {
         sendAmountRef.focus();
@@ -156,19 +166,24 @@ const Create = () => {
     createEffect(
         on([boltzFee, minerFee, reverse, asset], () => {
             if (amountChanged() === sideReceive) {
-                setSendAmount(BigInt(calculateSendAmount(receiveAmount())));
+                setSendAmount(
+                    BigInt(
+                        calculateSendAmount(Number(receiveAmount()), reverse()),
+                    ),
+                );
             } else {
-                setReceiveAmount(BigInt(calculateReceiveAmount(sendAmount())));
+                setReceiveAmount(
+                    BigInt(
+                        calculateReceiveAmount(Number(sendAmount()), reverse()),
+                    ),
+                );
             }
             validateAmount();
         }),
     );
 
     createEffect(() => {
-        if (assetSelect()) {
-            return;
-        }
-
+        if (assetSelect()) return;
         const ref =
             assetSelected() === sideSend ? sendAmountRef : receiveAmountRef;
         ref.focus();
@@ -242,7 +257,7 @@ const Create = () => {
                         data-testid="sendAmount"
                         value={sendAmountFormatted()}
                         onpaste={(e) => validatePaste(e)}
-                        onKeypress={(e) => validateInput(e)}
+                        onKeyPress={(e) => validateInput(e)}
                         onInput={(e) => changeSendAmount(e)}
                     />
                 </div>
@@ -261,7 +276,7 @@ const Create = () => {
                         data-testid="receiveAmount"
                         value={receiveAmountFormatted()}
                         onpaste={(e) => validatePaste(e)}
-                        onKeypress={(e) => validateInput(e)}
+                        onKeyPress={(e) => validateInput(e)}
                         onInput={(e) => changeReceiveAmount(e)}
                     />
                 </div>

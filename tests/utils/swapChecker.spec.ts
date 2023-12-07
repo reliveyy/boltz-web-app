@@ -4,8 +4,8 @@ import { AddressInfo } from "net";
 import { createRoot } from "solid-js";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { setSwapStatusAndClaim } from "../../src/helper";
 import { setSwap, setSwaps } from "../../src/signals";
+import { claim } from "../../src/utils/claim";
 import { checkInterval, swapChecker } from "../../src/utils/swapChecker";
 import {
     swapStatusFailed,
@@ -13,6 +13,7 @@ import {
     swapStatusSuccess,
 } from "../../src/utils/swapStatus";
 
+// @ts-ignore
 global.EventSource = EventSource;
 
 let apiUrl: string;
@@ -23,11 +24,11 @@ vi.mock("../../src/helper", async () => {
     return {
         isMobile: () => false,
         getApiUrl: () => apiUrl,
-        fetcher: (_path, cb, data) => {
+        fetcher: (_path: any, cb: any, data: any) => {
             fetcherCallData.push(data);
             cb();
         },
-        setSwapStatusAndClaim: vi.fn(),
+        claim: vi.fn(),
     };
 });
 
@@ -138,8 +139,8 @@ describe("swapChecker", () => {
         expect(Object.keys(server.connections).length).toEqual(1);
         expect(server.connections[swaps[0].id]).not.toBeUndefined();
 
-        expect(setSwapStatusAndClaim).toHaveBeenCalledTimes(3);
-        expect(setSwapStatusAndClaim).toHaveBeenCalledWith(message, swaps[0]);
+        expect(claim).toHaveBeenCalledTimes(3);
+        expect(claim).toHaveBeenCalledWith(message, swaps[0]);
     });
 
     test("should close SSE when active swap changes", async () => {

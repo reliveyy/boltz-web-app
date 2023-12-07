@@ -1,9 +1,12 @@
+import log from "loglevel";
+import QRCode from "qrcode/lib/server";
+
 import { isIos, isMobile } from "../helper";
 import t from "../i18n";
 import { swap } from "../signals";
 import { download, downloadJson } from "../utils/download";
 
-const createRefundData = (swap) => {
+const createRefundData = (swap: any) => {
     return {
         id: swap.id,
         asset: swap.asset,
@@ -39,13 +42,13 @@ const DownloadRefund = () => {
                     download(`${getRefundFileName(swap)}.png`, url);
                 }
             })
-            .catch((err) => {
+            .catch((err: Error) => {
                 log.error("qr code generation error", err);
             });
     };
 
     return (
-        <div className="download-refund">
+        <div class="download-refund">
             <button
                 class="btn btn-success"
                 onclick={() =>

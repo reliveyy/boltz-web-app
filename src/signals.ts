@@ -27,9 +27,6 @@ export const [swap, setSwap] = createSignal(null, {
     // To allow updating properties of the swap object without replacing it completely
     equals: () => false,
 });
-export const [swapStatus, setSwapStatus] = createSignal(null);
-export const [swapStatusTransaction, setSwapStatusTransaction] =
-    createSignal("");
 export const [failureReason, setFailureReason] = createSignal("");
 export const [timeoutEta, setTimeoutEta] = createSignal(0);
 export const [timeoutBlockHeight, setTimeoutBlockheight] = createSignal(0);

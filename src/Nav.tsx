@@ -11,8 +11,8 @@ import { setI18nConfigured } from "./signals";
 import "./style/nav.scss";
 
 const Nav = ({ network }) => {
-    let timeout;
-    const [hamburger, setHamburger] = createSignal(false);
+    let timeout: any;
+    const [hamburger, setHamburger] = createSignal<boolean>(false);
     return (
         <nav>
             <Warnings />

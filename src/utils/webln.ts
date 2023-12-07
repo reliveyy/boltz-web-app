@@ -1,15 +1,16 @@
 import log from "loglevel";
 
-export function detectWebLNProvider(timeoutParam) {
-    const timeout = timeoutParam ?? 3000;
+export function detectWebLNProvider(timeout: number = 3000) {
     const interval = 100;
 
     return new Promise((resolve) => {
+        // @ts-ignore
         if (window.webln) {
             handleWebLN();
         } else {
             let i = 0;
             const checkInterval = setInterval(function () {
+                // @ts-ignore
                 if (window.webln || i >= timeout / interval) {
                     handleWebLN();
                     clearInterval(checkInterval);
@@ -19,13 +20,15 @@ export function detectWebLNProvider(timeoutParam) {
         }
 
         function handleWebLN() {
+            // @ts-ignore
             resolve(window.webln !== undefined);
         }
     });
 }
 
-export async function enableWebln(cb) {
+export async function enableWebln(cb: Function) {
     try {
+        // @ts-ignore
         await window.webln.enable();
         await cb();
     } catch (error) {

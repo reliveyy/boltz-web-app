@@ -1,7 +1,6 @@
 import { makePersisted } from "@solid-primitives/storage";
 import {
     Accessor,
-    ResolvedChildren,
     Setter,
     createContext,
     createEffect,
@@ -41,13 +40,13 @@ const CreateContext = createContext<{
     setSendAmount: Setter<bigint>;
     receiveAmount: Accessor<bigint>;
     setReceiveAmount: Setter<bigint>;
-    sendAmountFormatted: Accessor<number>;
-    setSendAmountFormatted: Setter<number>;
-    receiveAmountFormatted: Accessor<number>;
-    setReceiveAmountFormatted: Setter<number>;
+    sendAmountFormatted: Accessor<string>;
+    setSendAmountFormatted: Setter<string>;
+    receiveAmountFormatted: Accessor<string>;
+    setReceiveAmountFormatted: Setter<string>;
 }>();
 
-const CreateProvider = (props: { children: ResolvedChildren }) => {
+const CreateProvider = (props: { children: any }) => {
     const [asset, setAsset] = createSignal<string>(defaultSelection);
     const [reverse, setReverse] = createSignal<boolean>(true);
     const [invoice, setInvoice] = createSignal<string>("");
@@ -81,8 +80,9 @@ const CreateProvider = (props: { children: ResolvedChildren }) => {
     // amounts
     const [sendAmount, setSendAmount] = createSignal(BigInt(0));
     const [receiveAmount, setReceiveAmount] = createSignal(BigInt(0));
-    const [sendAmountFormatted, setSendAmountFormatted] = createSignal(0);
-    const [receiveAmountFormatted, setReceiveAmountFormatted] = createSignal(0);
+    const [sendAmountFormatted, setSendAmountFormatted] = createSignal("");
+    const [receiveAmountFormatted, setReceiveAmountFormatted] =
+        createSignal("");
 
     return (
         <CreateContext.Provider

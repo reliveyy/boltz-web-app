@@ -1,7 +1,7 @@
 import log from "loglevel";
 import { createEffect, createSignal } from "solid-js";
 
-import { fetcher, getApiUrl, setSwapStatusAndClaim } from "../helper";
+import { fetcher, getApiUrl } from "../helper";
 import { swap, swaps } from "../signals";
 import { swapStatusFinal } from "./swapStatus";
 
@@ -13,6 +13,36 @@ let activeSwapStream = undefined;
 export const [checkInterval, setCheckInterval] = createSignal<
     NodeJS.Timer | undefined
 >(undefined);
+
+const runClaim = async (data: any, resolve?: Function) => {
+    // TODO: implement this function
+
+    // export const setSwapStatusAndClaim = (data: any, swapId: string) => {
+    //     const currentSwap = swaps().find((s) => swapId === s.id);
+
+    //     if (swap() && swap().id === currentSwap.id) {
+    //         setSwapStatus(data.status);
+    //     }
+
+    //     setSwapStatusTransaction(data.transaction);
+    //     updateSwapStatus(currentSwap.id, data.status);
+
+    //     if (
+    //         currentSwap.claimTx === undefined &&
+    //         data.transaction !== undefined &&
+    //         (data.status === swapStatusPending.TransactionConfirmed ||
+    //             data.status === swapStatusPending.TransactionMempool)
+    //     ) {
+    //         claim(currentSwap);
+    //     }
+    //     checkForFailed(currentSwap, data);
+    //     setFailureReason(data.failureReason);
+    // };
+    // setSwapStatusAndClaim(data, activeSwap.id);
+    // setSwapStatusAndClaim(data, swap);
+
+    if (resolve) resolve();
+};
 
 export const swapChecker = () => {
     createEffect(() => {
@@ -38,9 +68,7 @@ export const swapChecker = () => {
                 `/streamswapstatus?id=${activeSwap.id}`,
                 activeSwap.asset,
             ),
-            (data) => {
-                setSwapStatusAndClaim(data, activeSwap);
-            },
+            runClaim,
         );
     });
 
@@ -79,9 +107,8 @@ const runSwapCheck = async () => {
         await new Promise<void>((resolve) => {
             fetcher(
                 getApiUrl("/swapstatus", swap.asset),
-                (data) => {
-                    setSwapStatusAndClaim(data, swap);
-                    resolve();
+                (data: any) => {
+                    runClaim(data, resolve);
                 },
                 { id: swap.id },
             );

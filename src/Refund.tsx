@@ -6,7 +6,7 @@ import { Show, createEffect, createSignal } from "solid-js";
 import BlockExplorer from "./components/BlockExplorer";
 import RefundEta from "./components/RefundEta";
 import SwapList from "./components/SwapList";
-import { fetcher, getApiUrl, refund, refundAddressChange } from "./helper";
+import { fetcher, getApiUrl, refundAddressChange } from "./helper";
 import t from "./i18n";
 import {
     refundTx,
@@ -15,6 +15,7 @@ import {
     setTransactionToRefund,
     swaps,
 } from "./signals";
+import { refund } from "./utils/refund";
 import {
     swapStatusFailed,
     swapStatusSuccess,
@@ -41,7 +42,7 @@ const Refund = () => {
         }
     });
 
-    const checkRefundJsonKeys = (input, json) => {
+    const checkRefundJsonKeys = (input: HTMLInputElement, json: any) => {
         log.debug("checking refund json", json);
 
         // Redirect to normal flow if swap is in local storage
@@ -68,8 +69,8 @@ const Refund = () => {
         }
     };
 
-    const uploadChange = (e) => {
-        const input = e.currentTarget;
+    const uploadChange = (evt: Event) => {
+        const input = evt.currentTarget as HTMLInputElement;
         const inputFile = input.files[0];
         input.setCustomValidity("");
         setRefundJson("");
@@ -110,7 +111,7 @@ const Refund = () => {
 
                 setRefundable(true);
                 setTransactionToRefund(data);
-                await refund(refundJson(), t);
+                await refund(refundJson());
             },
             {
                 id: refundInfo.id,
@@ -118,12 +119,12 @@ const Refund = () => {
         );
     };
 
-    const refundSwapsSanityFilter = (swap) =>
+    const refundSwapsSanityFilter = (swap: any) =>
         !swap.reverse && swap.refundTx === undefined;
 
     const [refundableSwaps, setRefundableSwaps] = createSignal([]);
 
-    const addToRefundableSwaps = (swap) => {
+    const addToRefundableSwaps = (swap: any) => {
         setRefundableSwaps(refundableSwaps().concat(swap));
     };
 
@@ -210,7 +211,7 @@ const Refund = () => {
                 />
                 <button
                     class="btn"
-                    disabled={valid() && refundTx() === "" ? "" : "disabled"}
+                    disabled={!(valid() && refundTx() === "")}
                     onClick={startRefund}>
                     {t("refund")}
                 </button>

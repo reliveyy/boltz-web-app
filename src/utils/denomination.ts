@@ -18,11 +18,15 @@ export const getValidationRegex = () => {
     return new RegExp(regex);
 };
 
-export const formatAmount = (amount, fixed = false) => {
+export const formatAmount = (amount: number, fixed = false) => {
     return formatAmountDenomination(denomination(), amount, fixed);
 };
 
-export const formatAmountDenomination = (denom, amount, fixed = false) => {
+export const formatAmountDenomination = (
+    denom: string,
+    amount: number,
+    fixed = false,
+) => {
     switch (denom) {
         case denominations.btc:
             const amountBig = new BigNumber(amount).div(satFactor);
@@ -43,15 +47,19 @@ export const formatAmountDenomination = (denom, amount, fixed = false) => {
 
         case denominations.sat:
             return amount.toString();
+        default:
+            return amount.toString();
     }
 };
 
-export const convertAmount = (amount) => {
-    switch (denomination()) {
+export const convertAmount = (amount: number, denomination: string) => {
+    switch (denomination) {
         case denominations.btc:
             const amountBig = new BigNumber(amount).multipliedBy(satFactor);
             return amountBig.toNumber();
         case denominations.sat:
+            return Number(amount);
+        default:
             return Number(amount);
     }
 };

@@ -1,13 +1,7 @@
 import { abi as EtherSwapAbi } from "boltz-core/out/EtherSwap.sol/EtherSwap.json";
 import { EtherSwap } from "boltz-core/typechain/EtherSwap";
 import { BrowserProvider, Contract, JsonRpcSigner } from "ethers";
-import {
-    Accessor,
-    ResolvedChildren,
-    createContext,
-    createSignal,
-    useContext,
-} from "solid-js";
+import { Accessor, createContext, createSignal, useContext } from "solid-js";
 
 import { pairs } from "../config";
 import { RBTC } from "../consts";
@@ -24,10 +18,7 @@ const Web3SignerContext = createContext<{
     hasMetamask: Accessor<boolean>;
 }>();
 
-const Web3SignerProvider = (props: {
-    children: ResolvedChildren;
-    noFetch?: boolean;
-}) => {
+const Web3SignerProvider = (props: { children: any; noFetch?: boolean }) => {
     const [provider, setProvider] = createSignal<BrowserProvider | undefined>();
     const [signer, setSigner] = createSignal<JsonRpcSigner | undefined>();
     const [hasMetamask, setHasMetamask] = createSignal<boolean>(false);

@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import log from "loglevel";
 import { Show, createEffect, createSignal } from "solid-js";
 
-import fetcher, { getApiUrl, refund, refundAddressChange } from "../helper";
+import fetcher, { getApiUrl, refundAddressChange } from "../helper";
 import t from "../i18n";
 import {
     failureReason,
@@ -10,6 +10,7 @@ import {
     swap,
     transactionToRefund,
 } from "../signals";
+import { refund } from "../utils/refund";
 
 const SwapExpired = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const SwapExpired = () => {
         setTransactionToRefund(null);
         fetcher(
             getApiUrl("/getswaptransaction", swap().asset),
-            (res) => {
+            (res: any) => {
                 log.debug(`got swap transaction for ${swap().id}`);
                 setTransactionToRefund(res);
             },
@@ -51,8 +52,8 @@ const SwapExpired = () => {
                 />
                 <button
                     class="btn"
-                    disabled={valid() ? "" : "disabled"}
-                    onclick={() => refund(swap(), t)}>
+                    disabled={!valid()}
+                    onclick={() => refund(swap())}>
                     {t("refund")}
                 </button>
                 <hr />

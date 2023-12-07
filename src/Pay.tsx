@@ -7,16 +7,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import { RBTC } from "./consts";
 import { fetcher, getApiUrl } from "./helper";
 import t from "./i18n";
-import {
-    setFailureReason,
-    setSwap,
-    setSwapStatus,
-    setSwapStatusTransaction,
-    swap,
-    swapStatus,
-    swapStatusTransaction,
-    swaps,
-} from "./signals";
+import { setFailureReason, setSwap, swap, swaps } from "./signals";
 import InvoiceExpired from "./status/InvoiceExpired";
 import InvoiceFailedToPay from "./status/InvoiceFailedToPay";
 import InvoicePending from "./status/InvoicePending";
@@ -32,6 +23,8 @@ import { swapStatusFailed } from "./utils/swapStatus";
 
 const Pay = () => {
     const params = useParams();
+    const [swapStatus, setSwapStatus] = createSignal(null);
+    const [swapStatusTransaction, setSwapStatusTransaction] = createSignal("");
     const [contractTransaction, setContractTransaction] =
         createSignal(undefined);
     const [contractTransactionType, setContractTransactionType] =

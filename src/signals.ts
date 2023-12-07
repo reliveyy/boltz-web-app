@@ -8,7 +8,7 @@ import { isMobile } from "./helper";
 export const [assetSelect, setAssetSelect] = createSignal(false);
 export const [assetSelected, setAssetSelected] = createSignal(null);
 
-export const [config, setConfig] = createSignal(0);
+export const [config, setConfig] = createSignal({});
 
 export const [online, setOnline] = createSignal(true);
 export const [wasmSupported, setWasmSupported] = createSignal(true);

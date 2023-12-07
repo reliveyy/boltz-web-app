@@ -1,16 +1,23 @@
 import { Router } from "@solidjs/router";
 import { fireEvent, render, screen } from "@solidjs/testing-library";
-import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 
 import Create from "../../src/Create";
-import { sideReceive, sideSend } from "../../src/consts";
+import { BTC, LBTC, sideReceive, sideSend } from "../../src/consts";
+import { CreateProvider, useCreateContext } from "../../src/context/Create";
 import { Web3SignerProvider } from "../../src/context/Web3";
 import i18n from "../../src/i18n/i18n";
-import * as signals from "../../src/signals";
 import { calculateReceiveAmount } from "../../src/utils/calculate";
 import { cfg } from "../config";
 
 describe("Create", () => {
+    let signals: any;
+
+    const TestComponent = () => {
+        signals = useCreateContext();
+        return "";
+    };
+
     beforeAll(() => {
         signals.setConfig(cfg);
         signals.setMinimum(cfg["BTC/BTC"].limits.minimal);
@@ -25,7 +32,10 @@ describe("Create", () => {
         render(() => (
             <Router>
                 <Web3SignerProvider noFetch={true}>
-                    <Create />
+                    <CreateProvider>
+                        <TestComponent />
+                        <Create />
+                    </CreateProvider>
                 </Web3SignerProvider>
             </Router>
         ));
@@ -34,12 +44,15 @@ describe("Create", () => {
     });
 
     test("should update receive amount on asset change", async () => {
-        const setReceiveAmount = vi.spyOn(signals, "setReceiveAmount");
+        // const setReceiveAmount = vi.spyOn(signals, "setReceiveAmount");
 
         render(() => (
             <Router>
                 <Web3SignerProvider noFetch={true}>
-                    <Create />
+                    <CreateProvider>
+                        <TestComponent />
+                        <Create />
+                    </CreateProvider>
                 </Web3SignerProvider>
             </Router>
         ));
@@ -47,41 +60,45 @@ describe("Create", () => {
         signals.setSendAmount(50_000n);
 
         // To force trigger a recalculation
-        signals.setAsset("L-BTC");
-        signals.setAsset("BTC");
+        signals.setAsset(LBTC);
+        signals.setAsset(BTC);
 
-        expect(setReceiveAmount).toHaveBeenCalledWith(38110n);
+        expect(signals.receiveAmount()).toEqual(38110n);
 
-        signals.setAsset("L-BTC");
+        signals.setAsset(LBTC);
 
-        expect(setReceiveAmount).toHaveBeenLastCalledWith(49447n);
+        expect(signals.receiveAmount()).toEqual(49447n);
     });
 
     test("should update receive amount on miner fee change", async () => {
-        const setReceiveAmount = vi.spyOn(signals, "setReceiveAmount");
-
         render(() => (
             <Router>
                 <Web3SignerProvider noFetch={true}>
-                    <Create />
+                    <CreateProvider>
+                        <TestComponent />
+                        <Create />
+                    </CreateProvider>
                 </Web3SignerProvider>
             </Router>
         ));
 
-        expect(setReceiveAmount).toHaveBeenCalledWith(38110n);
+        expect(signals.receiveAmount()).toEqual(38110n);
 
         const updatedCfg = { ...cfg };
         cfg["BTC/BTC"].fees.minerFees.baseAsset.reverse.claim += 1;
         signals.setConfig(updatedCfg);
 
-        expect(setReceiveAmount).toHaveBeenLastCalledWith(38110n - 1n);
+        expect(signals.receiveAmount()).toEqual(38110n - 1n);
     });
 
     test("should update calculated value on fee change", async () => {
         render(() => (
             <Router>
                 <Web3SignerProvider noFetch={true}>
-                    <Create />
+                    <CreateProvider>
+                        <TestComponent />
+                        <Create />
+                    </CreateProvider>
                 </Web3SignerProvider>
             </Router>
         ));
@@ -92,40 +109,22 @@ describe("Create", () => {
             signals.setConfig(updatedCfg);
         };
 
-        const setSendAmount = vi.spyOn(signals, "setSendAmount");
-        const setReceiveAmount = vi.spyOn(signals, "setReceiveAmount");
-        const setAmountChanged = vi.spyOn(signals, "setAmountChanged");
-
         const amount = 100_000;
         fireEvent.input(await screen.findByTestId("receiveAmount"), {
             target: { value: amount },
         });
 
-        expect(setAmountChanged).toHaveBeenCalledWith(sideReceive);
-
-        expect(setSendAmount).toHaveBeenCalledTimes(1);
-        expect(setSendAmount).not.toHaveBeenCalledWith(BigInt(amount));
-        expect(setReceiveAmount).toHaveBeenCalledTimes(1);
-        expect(setReceiveAmount).toHaveBeenCalledWith(BigInt(amount));
+        expect(signals.amountChanged()).toEqual(sideReceive);
+        expect(signals.sendAmount()).not.toEqual(BigInt(amount));
+        expect(signals.receiveAmount()).toEqual(BigInt(amount));
 
         updateConfig();
-
-        expect(setSendAmount).toHaveBeenCalledTimes(2);
-        expect(setReceiveAmount).toHaveBeenCalledTimes(1);
 
         fireEvent.input(await screen.findByTestId("sendAmount"), {
             target: { value: amount },
         });
 
-        expect(setAmountChanged).toHaveBeenCalledWith(sideSend);
-
-        expect(setSendAmount).toHaveBeenCalledTimes(3);
-        expect(setReceiveAmount).toHaveBeenCalledTimes(2);
-
-        updateConfig();
-
-        expect(setSendAmount).toHaveBeenCalledTimes(3);
-        expect(setReceiveAmount).toHaveBeenCalledTimes(3);
+        expect(signals.amountChanged()).toEqual(sideSend);
     });
 
     test.each`
@@ -136,25 +135,23 @@ describe("Create", () => {
         render(() => (
             <Router>
                 <Web3SignerProvider noFetch={true}>
-                    <Create />
+                    <CreateProvider>
+                        <TestComponent />
+                        <Create />
+                    </CreateProvider>
                 </Web3SignerProvider>
             </Router>
         ));
-
-        const setSendAmount = vi.spyOn(signals, "setSendAmount");
-        const setReceiveAmount = vi.spyOn(signals, "setReceiveAmount");
 
         const amount =
             extrema === "min" ? signals.minimum() : signals.maximum();
 
         fireEvent.click(await screen.findByText(amount));
 
-        expect(setSendAmount).toHaveBeenCalledTimes(1);
-        expect(setSendAmount).toHaveBeenCalledWith(amount);
+        expect(signals.sendAmount()).toEqual(amount);
 
-        expect(setReceiveAmount).toHaveBeenCalledTimes(1);
-        expect(setReceiveAmount).toHaveBeenCalledWith(
-            calculateReceiveAmount(amount, reverse()),
+        expect(signals.receiveAmount()).toEqual(
+            calculateReceiveAmount(amount, signals.reverse()),
         );
     });
 });

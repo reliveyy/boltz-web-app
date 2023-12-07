@@ -4,7 +4,6 @@ import { Show, createEffect, createMemo, on, onMount } from "solid-js";
 import AddressInput from "./components/AddressInput";
 import Asset from "./components/Asset";
 import AssetSelect from "./components/AssetSelect";
-import ClickableAmount from "./components/ClickableAmount";
 import ConnectMetamask from "./components/ConnectMetamask";
 import { CreateButton, setButtonLabel } from "./components/CreateButton";
 import Fees from "./components/Fees";
@@ -156,9 +155,6 @@ const Create = () => {
         sendAmountRef.focus();
     };
 
-
-
-
     onMount(() => {
         sendAmountRef.focus();
     });
@@ -229,17 +225,18 @@ const Create = () => {
             <h2>{t("create_swap")}</h2>
             <p>
                 {t("create_swap_subline")} <br />
-                {t("send")}{" "}
-                <ClickableAmount
-                    label={t("min")}
-                    onClick={setAmount}
-                    amount={minimum}
-                />{" "}
-                <ClickableAmount
-                    label={t("max")}
-                    onClick={setAmount}
-                    amount={maximum}
-                />
+                {t("send")} {t("min")}{" "}
+                <span
+                    class="btn-small btn-light"
+                    onClick={() => setAmount(minimum())}>
+                    {formatAmount(minimum())}
+                </span>{" "}
+                {t("max")}{" "}
+                <span
+                    class="btn-small btn-light"
+                    onClick={() => setAmount(maximum())}>
+                    {formatAmount(maximum())}
+                </span>
             </p>
             <div class="icons">
                 <div>

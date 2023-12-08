@@ -17,6 +17,8 @@ import { setSwaps, swaps } from "../signals";
 
 type SwapStatusReverse = {
     hex: string;
+    eta: number;
+    id: string;
 };
 
 const createAdjustedClaim = (

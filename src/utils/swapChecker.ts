@@ -2,10 +2,15 @@ import log from "loglevel";
 import { createEffect, createSignal } from "solid-js";
 
 import { RBTC } from "../consts";
-import { fetcher, getApiUrl, runClaim } from "../helper";
+import { fetcher, getApiUrl } from "../helper";
 import { swap, swaps } from "../signals";
 import { setTimeoutBlockheight, setTimeoutEta } from "../signals";
-import { swapStatusFinal } from "./swapStatus";
+import { claim } from "./claim";
+import {
+    checkClaimStatus,
+    swapStatusFinal,
+    updateSwapStatus,
+} from "./swapStatus";
 
 const swapCheckInterval = 3000;
 let activeStreamId = undefined;
@@ -39,7 +44,7 @@ export const checkForFailed = (swapId: string, asset: string, data: any) => {
                 setTimeoutBlockheight(data.timeoutBlockHeight);
             },
             {
-                swapId,
+                id: swapId,
             },
         );
     }
@@ -69,7 +74,19 @@ export const swapChecker = () => {
                 `/streamswapstatus?id=${activeSwap.id}`,
                 activeSwap.asset,
             ),
-            (data) => runClaim(data, activeSwap.id),
+            async (data) => {
+                updateSwapStatus(activeSwap.id, data.status);
+                checkForFailed(activeSwap.id, activeSwap.asset, data);
+                if (
+                    checkClaimStatus(
+                        data?.status,
+                        data?.transaction,
+                        activeSwap?.claimTx,
+                    )
+                ) {
+                    await claim(activeSwap, data.transaction);
+                }
+            },
         );
     });
 
@@ -109,7 +126,15 @@ const runSwapCheck = async () => {
             fetcher(
                 getApiUrl("/swapstatus", swap.asset),
                 async (data: any) => {
-                    await runClaim(data, swap.id);
+                    if (
+                        checkClaimStatus(
+                            data?.status,
+                            data?.transaction,
+                            swap?.claimTx,
+                        )
+                    ) {
+                        await claim(swap, data.transaction);
+                    }
                     resolve();
                 },
                 { id: swap.id },

@@ -95,9 +95,9 @@ const CreateProvider = (props: { children: any }) => {
     // amounts
     const [sendAmount, setSendAmount] = createSignal(BigInt(0));
     const [receiveAmount, setReceiveAmount] = createSignal(BigInt(0));
-    const [sendAmountFormatted, setSendAmountFormatted] = createSignal("");
+    const [sendAmountFormatted, setSendAmountFormatted] = createSignal("0");
     const [receiveAmountFormatted, setReceiveAmountFormatted] =
-        createSignal("");
+        createSignal("0");
 
     const [amountChanged, setAmountChanged] = createSignal(sideSend);
     const [minimum, setMinimum] = createSignal<number>(0);

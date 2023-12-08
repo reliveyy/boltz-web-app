@@ -37,3 +37,16 @@ export const updateSwapStatus = (id: string, newStatus: string) => {
 
     return false;
 };
+
+export const checkClaimStatus = (
+    status?: string,
+    transaction?: string,
+    claimTx?: string,
+) => {
+    return (
+        claimTx === undefined &&
+        transaction !== undefined &&
+        (status === swapStatusPending.TransactionConfirmed ||
+            status === swapStatusPending.TransactionMempool)
+    );
+};

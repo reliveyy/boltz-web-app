@@ -6,7 +6,6 @@ import {
     config,
     ref,
     setConfig,
-    setFailureReason,
     setNotification,
     setNotificationType,
     setOnline,
@@ -15,11 +14,8 @@ import {
     swap,
     swaps,
 } from "./signals";
-import { claim } from "./utils/claim";
 import { feeChecker } from "./utils/feeChecker";
 import { checkResponse } from "./utils/http";
-import { checkForFailed } from "./utils/swapChecker";
-import { swapStatusPending, updateSwapStatus } from "./utils/swapStatus";
 
 export const isIos = !!navigator.userAgent.match(/iphone|ipad/gi) || false;
 export const isMobile =
@@ -157,25 +153,6 @@ export const updateSwaps = (cb: Function) => {
     const currentSwap = swapsTmp.find((s) => swap().id === s.id);
     cb(currentSwap);
     setSwaps(swapsTmp);
-};
-
-export const runClaim = async (data: any, swapId: string) => {
-    const currentSwap = swaps().find((s) => swapId === s.id);
-
-    if (data.status) {
-        updateSwapStatus(currentSwap.id, data.status);
-    }
-
-    if (
-        currentSwap.claimTx === undefined &&
-        data.transaction !== undefined &&
-        (data.status === swapStatusPending.TransactionConfirmed ||
-            data.status === swapStatusPending.TransactionMempool)
-    ) {
-        await claim(currentSwap, data);
-    }
-    checkForFailed(swapId, currentSwap.asset, data);
-    setFailureReason(data.failureReason);
 };
 
 export default fetcher;

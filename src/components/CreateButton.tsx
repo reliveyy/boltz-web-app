@@ -8,7 +8,7 @@ import { RBTC } from "../consts";
 import { useCreateContext } from "../context/Create";
 import { useWeb3Signer } from "../context/Web3";
 import { ECPair } from "../ecpair/ecpair";
-import { feeCheck, fetcher } from "../helper";
+import { feeCheck, fetcher, getApiUrl } from "../helper";
 import t from "../i18n";
 import {
     config,
@@ -146,7 +146,7 @@ export const CreateButton = () => {
 
         await new Promise((resolve) => {
             fetcher(
-                "/createswap",
+                getApiUrl("/createswap", assetName),
                 (data: any) => {
                     data.date = new Date().getTime();
                     data.reverse = reverse();

@@ -4,8 +4,8 @@ import { AddressInfo } from "net";
 import { createRoot } from "solid-js";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { runClaim } from "../../src/helper";
 import { setSwap, setSwaps } from "../../src/signals";
+import { claim } from "../../src/utils/claim";
 import { checkInterval, swapChecker } from "../../src/utils/swapChecker";
 import {
     swapStatusFailed,
@@ -28,7 +28,12 @@ vi.mock("../../src/helper", async () => {
             fetcherCallData.push(data);
             cb();
         },
-        runClaim: vi.fn(),
+    };
+});
+
+vi.mock("../../src/utils/claim", async () => {
+    return {
+        claim: vi.fn(),
     };
 });
 
@@ -94,11 +99,13 @@ describe("swapChecker", () => {
             id: "pending",
             asset: "BTC",
             status: swapStatusPending.TransactionMempool,
+            transaction: "some tx",
         },
         {
             id: "failed",
             asset: "BTC",
             status: swapStatusFailed.InvoiceFailedToPay,
+            transaction: "some tx",
         },
         {
             id: "success",
@@ -132,15 +139,17 @@ describe("swapChecker", () => {
         setSwap(swaps[0]);
         await wait();
 
-        const message = { status: "some update" };
+        const message = {
+            status: swapStatusPending.TransactionMempool,
+            transaction: "some tx",
+        };
         server.sendMessage(swaps[0].id, JSON.stringify(message));
         await wait();
 
         expect(Object.keys(server.connections).length).toEqual(1);
         expect(server.connections[swaps[0].id]).not.toBeUndefined();
 
-        expect(runClaim).toHaveBeenCalledTimes(3);
-        expect(runClaim).toHaveBeenCalledWith(message, swaps[0].id);
+        expect(claim).toHaveBeenCalledWith(swaps[0], message.transaction);
     });
 
     test("should close SSE when active swap changes", async () => {

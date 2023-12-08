@@ -28,6 +28,11 @@ vi.mock("../../src/helper", async () => {
             fetcherCallData.push(data);
             cb();
         },
+    };
+});
+
+vi.mock("../../src/utils/claim", async () => {
+    return {
         claim: vi.fn(),
     };
 });

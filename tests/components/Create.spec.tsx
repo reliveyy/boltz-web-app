@@ -55,7 +55,7 @@ describe("Create", () => {
         ));
         signals.setMinimum(cfg["BTC/BTC"].limits.minimal);
         signals.setReverse(true);
-        signals.setAsset("BTC");
+        signals.setAsset(BTC);
 
         signals.setSendAmount(50_000n);
 
@@ -81,13 +81,19 @@ describe("Create", () => {
                 </Web3SignerProvider>
             </Router>
         ));
+
         signals.setMinimum(cfg["BTC/BTC"].limits.minimal);
         signals.setReverse(true);
+        signals.setSendAmount(50_000n);
+
+        // To force trigger a recalculation
+        signals.setAsset(LBTC);
         signals.setAsset(BTC);
 
         expect(signals.receiveAmount()).toEqual(38110n);
 
         cfg["BTC/BTC"].fees.minerFees.baseAsset.reverse.claim += 1;
+
         const updatedCfg = { ...cfg };
         setConfig(updatedCfg);
 

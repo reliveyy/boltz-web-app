@@ -4,8 +4,8 @@ import { AddressInfo } from "net";
 import { createRoot } from "solid-js";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
+import { runClaim } from "../../src/helper";
 import { setSwap, setSwaps } from "../../src/signals";
-import { claim } from "../../src/utils/claim";
 import { checkInterval, swapChecker } from "../../src/utils/swapChecker";
 import {
     swapStatusFailed,
@@ -28,12 +28,7 @@ vi.mock("../../src/helper", async () => {
             fetcherCallData.push(data);
             cb();
         },
-    };
-});
-
-vi.mock("../../src/utils/claim", async () => {
-    return {
-        claim: vi.fn(),
+        runClaim: vi.fn(),
     };
 });
 
@@ -117,7 +112,7 @@ describe("swapChecker", () => {
         createRoot(() => {
             swapChecker();
         });
-        await wait(100);
+        await wait(200);
 
         expect(fetcherCallData).toHaveLength(2);
         expect(fetcherCallData).toEqual([
@@ -144,8 +139,8 @@ describe("swapChecker", () => {
         expect(Object.keys(server.connections).length).toEqual(1);
         expect(server.connections[swaps[0].id]).not.toBeUndefined();
 
-        expect(claim).toHaveBeenCalledTimes(3);
-        expect(claim).toHaveBeenCalledWith(message, swaps[0]);
+        expect(runClaim).toHaveBeenCalledTimes(3);
+        expect(runClaim).toHaveBeenCalledWith(message, swaps[0].id);
     });
 
     test("should close SSE when active swap changes", async () => {

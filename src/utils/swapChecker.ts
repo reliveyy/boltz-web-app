@@ -1,12 +1,13 @@
 import log from "loglevel";
 import { createEffect, createSignal } from "solid-js";
 
-import { fetcher, getApiUrl } from "../helper";
+import { RBTC } from "../consts";
+import { fetcher, getApiUrl, runClaim } from "../helper";
 import { swap, swaps } from "../signals";
+import { setTimeoutBlockheight, setTimeoutEta } from "../signals";
 import { swapStatusFinal } from "./swapStatus";
 
 const swapCheckInterval = 3000;
-
 let activeStreamId = undefined;
 let activeSwapStream = undefined;
 
@@ -14,34 +15,34 @@ export const [checkInterval, setCheckInterval] = createSignal<
     NodeJS.Timer | undefined
 >(undefined);
 
-const runClaim = async (data: any, resolve?: Function) => {
-    // TODO: implement this function
-
-    // export const setSwapStatusAndClaim = (data: any, swapId: string) => {
-    //     const currentSwap = swaps().find((s) => swapId === s.id);
-
-    //     if (swap() && swap().id === currentSwap.id) {
-    //         setSwapStatus(data.status);
-    //     }
-
-    //     setSwapStatusTransaction(data.transaction);
-    //     updateSwapStatus(currentSwap.id, data.status);
-
-    //     if (
-    //         currentSwap.claimTx === undefined &&
-    //         data.transaction !== undefined &&
-    //         (data.status === swapStatusPending.TransactionConfirmed ||
-    //             data.status === swapStatusPending.TransactionMempool)
-    //     ) {
-    //         claim(currentSwap);
-    //     }
-    //     checkForFailed(currentSwap, data);
-    //     setFailureReason(data.failureReason);
-    // };
-    // setSwapStatusAndClaim(data, activeSwap.id);
-    // setSwapStatusAndClaim(data, swap);
-
-    if (resolve) resolve();
+export const checkForFailed = (swapId: string, asset: string, data: any) => {
+    if (
+        data.status == "transaction.lockupFailed" ||
+        data.status == "invoice.failedToPay"
+    ) {
+        fetcher(
+            getApiUrl("/getswaptransaction", asset),
+            (data) => {
+                if (asset !== RBTC && !data.transactionHex) {
+                    log.error("no mempool tx found");
+                }
+                if (!data.timeoutEta) {
+                    log.error("no timeout eta");
+                }
+                if (!data.timeoutBlockHeight) {
+                    log.error("no timeout blockheight");
+                }
+                const timestamp = data.timeoutEta * 1000;
+                const eta = new Date(timestamp);
+                log.debug("Timeout ETA: \n " + eta.toLocaleString(), timestamp);
+                setTimeoutEta(timestamp);
+                setTimeoutBlockheight(data.timeoutBlockHeight);
+            },
+            {
+                swapId,
+            },
+        );
+    }
 };
 
 export const swapChecker = () => {
@@ -68,7 +69,7 @@ export const swapChecker = () => {
                 `/streamswapstatus?id=${activeSwap.id}`,
                 activeSwap.asset,
             ),
-            runClaim,
+            (data) => runClaim(data, activeSwap.id),
         );
     });
 
@@ -107,8 +108,9 @@ const runSwapCheck = async () => {
         await new Promise<void>((resolve) => {
             fetcher(
                 getApiUrl("/swapstatus", swap.asset),
-                (data: any) => {
-                    runClaim(data, resolve);
+                async (data: any) => {
+                    await runClaim(data, swap.id);
+                    resolve();
                 },
                 { id: swap.id },
             );

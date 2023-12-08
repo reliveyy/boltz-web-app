@@ -1,23 +1,25 @@
 import log from "loglevel";
 
 import { pairs } from "./config";
-import { BTC, RBTC } from "./consts";
+import { BTC } from "./consts";
 import {
     config,
     ref,
     setConfig,
+    setFailureReason,
     setNotification,
     setNotificationType,
     setOnline,
     setRef,
     setSwaps,
-    setTimeoutBlockheight,
-    setTimeoutEta,
     swap,
     swaps,
 } from "./signals";
+import { claim } from "./utils/claim";
 import { feeChecker } from "./utils/feeChecker";
 import { checkResponse } from "./utils/http";
+import { checkForFailed } from "./utils/swapChecker";
+import { swapStatusPending, updateSwapStatus } from "./utils/swapStatus";
 
 export const isIos = !!navigator.userAgent.match(/iphone|ipad/gi) || false;
 export const isMobile =
@@ -104,38 +106,6 @@ export const fetcher = (
     fetch(url, opts).then(checkResponse).then(cb).catch(errorCb);
 };
 
-export const checkForFailed = (swap: any, data: any) => {
-    if (
-        data.status == "transaction.lockupFailed" ||
-        data.status == "invoice.failedToPay"
-    ) {
-        const id = swap.id;
-
-        fetcher(
-            getApiUrl("/getswaptransaction", swap.asset),
-            (data) => {
-                if (swap.asset !== RBTC && !data.transactionHex) {
-                    log.error("no mempool tx found");
-                }
-                if (!data.timeoutEta) {
-                    log.error("no timeout eta");
-                }
-                if (!data.timeoutBlockHeight) {
-                    log.error("no timeout blockheight");
-                }
-                const timestamp = data.timeoutEta * 1000;
-                const eta = new Date(timestamp);
-                log.debug("Timeout ETA: \n " + eta.toLocaleString(), timestamp);
-                setTimeoutEta(timestamp);
-                setTimeoutBlockheight(data.timeoutBlockHeight);
-            },
-            {
-                id,
-            },
-        );
-    }
-};
-
 export const fetchPairs = () => {
     fetcher(
         getApiUrl("/getpairs", BTC),
@@ -187,6 +157,25 @@ export const updateSwaps = (cb: Function) => {
     const currentSwap = swapsTmp.find((s) => swap().id === s.id);
     cb(currentSwap);
     setSwaps(swapsTmp);
+};
+
+export const runClaim = async (data: any, swapId: string) => {
+    const currentSwap = swaps().find((s) => swapId === s.id);
+
+    if (data.status) {
+        updateSwapStatus(currentSwap.id, data.status);
+    }
+
+    if (
+        currentSwap.claimTx === undefined &&
+        data.transaction !== undefined &&
+        (data.status === swapStatusPending.TransactionConfirmed ||
+            data.status === swapStatusPending.TransactionMempool)
+    ) {
+        await claim(currentSwap, data);
+    }
+    checkForFailed(swapId, currentSwap.asset, data);
+    setFailureReason(data.failureReason);
 };
 
 export default fetcher;

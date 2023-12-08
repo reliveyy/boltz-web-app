@@ -4,18 +4,11 @@ import QrScanner from "qr-scanner";
 import { Show, createEffect, createSignal } from "solid-js";
 
 import BlockExplorer from "./components/BlockExplorer";
-import RefundEta from "./components/RefundEta";
+import RefundCreate from "./components/RefundCreate";
 import SwapList from "./components/SwapList";
 import { fetcher, getApiUrl } from "./helper";
 import t from "./i18n";
-import {
-    refundTx,
-    setTimeoutBlockheight,
-    setTimeoutEta,
-    setTransactionToRefund,
-    swaps,
-} from "./signals";
-import { refund } from "./utils/refund";
+import { refundTx, swaps } from "./signals";
 import {
     swapStatusFailed,
     swapStatusSuccess,
@@ -28,19 +21,8 @@ const refundJsonKeysLiquid = refundJsonKeys.concat("blindingKey");
 const Refund = () => {
     const navigate = useNavigate();
 
-    const [valid, setValid] = createSignal(false);
-    const [addressValid, setAddressValid] = createSignal(false);
     const [refundJsonValid, setRefundJsonValid] = createSignal(false);
-    const [refundable, setRefundable] = createSignal(true);
     const [refundJson, setRefundJson] = createSignal(null);
-
-    createEffect(() => {
-        if (addressValid() && refundJsonValid()) {
-            setValid(true);
-        } else {
-            setValid(false);
-        }
-    });
 
     const checkRefundJsonKeys = (input: HTMLInputElement, json: any) => {
         log.debug("checking refund json", json);
@@ -94,29 +76,6 @@ const Refund = () => {
                     input.setCustomValidity(t("invalid_refund_file"));
                 });
         }
-    };
-
-    const startRefund = () => {
-        if (!valid()) return;
-        const refundInfo = refundJson();
-        fetcher(
-            getApiUrl("/getswaptransaction", refundInfo.asset),
-            async (data) => {
-                if (data.timeoutEta) {
-                    setTimeoutEta(data.timeoutEta * 1000);
-                    setTimeoutBlockheight(data.timeoutBlockHeight);
-                    setRefundable(false);
-                    return;
-                }
-
-                setRefundable(true);
-                setTransactionToRefund(data);
-                await refund(refundJson());
-            },
-            {
-                id: refundInfo.id,
-            },
-        );
     };
 
     const refundSwapsSanityFilter = (swap: any) =>
@@ -196,29 +155,10 @@ const Refund = () => {
                     accept="application/json,image/png"
                     onChange={(e) => uploadChange(e)}
                 />
-                <input
-                    required
-                    disabled={!refundJsonValid()}
-                    onInput={(e) =>
-                        setAddressValid(
-                            refundAddressChange(e, refundJson().asset),
-                        )
-                    }
-                    type="text"
-                    id="refundAddress"
-                    name="refundAddress"
-                    placeholder={t("refund_address_placeholder")}
+                <RefundCreate
+                    swap={refundJson()}
+                    refundValid={refundJsonValid}
                 />
-                <button
-                    class="btn"
-                    disabled={!(valid() && refundTx() === "")}
-                    onClick={startRefund}>
-                    {t("refund")}
-                </button>
-                <Show when={!refundable()}>
-                    <hr />
-                    <RefundEta />
-                </Show>
                 <Show when={refundTx() !== ""}>
                     <hr />
                     <p>{t("refunded")}</p>

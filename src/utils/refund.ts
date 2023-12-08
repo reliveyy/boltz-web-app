@@ -8,6 +8,7 @@ import {
     getTransaction,
     setup,
 } from "../compat";
+import { LBTC } from "../consts";
 import { ECPair } from "../ecpair/ecpair";
 import { fetcher, getApiUrl, parseBlindingKey } from "../helper";
 import t from "../i18n";
@@ -84,7 +85,7 @@ export async function refund(
 
     const Transaction = getTransaction(asset_name);
     const net = getNetwork(asset_name);
-    const assetHash = asset_name === "L-BTC" ? net.assetHash : undefined;
+    const assetHash = asset_name === LBTC ? net.assetHash : undefined;
 
     let tx = Transaction.fromHex(txHex);
     let script = Buffer.from(swap.redeemScript, "hex");
@@ -96,12 +97,13 @@ export async function refund(
     );
     log.debug("privkey", private_key);
 
-    // TODO: fix
     const constructRefundTransaction =
         getConstructRefundTransaction(asset_name);
 
+    // TODO: fix, @michael1011?
+    // missing some keys for TransactionOutput?
     const refundTransaction = constructRefundTransaction(
-        swap,
+        // @ts-ignore
         [
             {
                 ...swapOutput,

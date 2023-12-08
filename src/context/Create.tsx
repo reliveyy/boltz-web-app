@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 
 import { pairs } from "../config";
-import { LN } from "../consts";
+import { LN, sideSend } from "../consts";
 
 const defaultSelection = Object.keys(pairs)[0].split("/")[0];
 
@@ -28,6 +28,10 @@ const CreateContext = createContext<{
     setAssetSend: Setter<string>;
     assetReceive: Accessor<string>;
     setAssetReceive: Setter<string>;
+    assetSelect: Accessor<boolean>;
+    setAssetSelect: Setter<boolean>;
+    assetSelected: Accessor<string>;
+    setAssetSelected: Setter<string>;
     valid: Accessor<boolean>;
     setValid: Setter<boolean>;
     invoiceValid: Accessor<boolean>;
@@ -44,6 +48,12 @@ const CreateContext = createContext<{
     setSendAmountFormatted: Setter<string>;
     receiveAmountFormatted: Accessor<string>;
     setReceiveAmountFormatted: Setter<string>;
+    amountChanged: Accessor<string>;
+    setAmountChanged: Setter<string>;
+    minimum: Accessor<number>;
+    setMinimum: Setter<number>;
+    maximum: Accessor<number>;
+    setMaximum: Setter<number>;
 }>();
 
 const CreateProvider = (props: { children: any }) => {
@@ -57,6 +67,7 @@ const CreateProvider = (props: { children: any }) => {
         createSignal(defaultSelection),
         { name: "assetReceive" },
     );
+
     const [assetSend, setAssetSend] = makePersisted(createSignal(LN), {
         name: "assetSend",
     });
@@ -71,6 +82,10 @@ const CreateProvider = (props: { children: any }) => {
         });
     });
 
+    // asset selection
+    const [assetSelect, setAssetSelect] = createSignal(false);
+    const [assetSelected, setAssetSelected] = createSignal(null);
+
     // validation
     const [valid, setValid] = createSignal(false);
     const [invoiceValid, setInvoiceValid] = createSignal(false);
@@ -83,6 +98,10 @@ const CreateProvider = (props: { children: any }) => {
     const [sendAmountFormatted, setSendAmountFormatted] = createSignal("");
     const [receiveAmountFormatted, setReceiveAmountFormatted] =
         createSignal("");
+
+    const [amountChanged, setAmountChanged] = createSignal(sideSend);
+    const [minimum, setMinimum] = createSignal<number>(0);
+    const [maximum, setMaximum] = createSignal<number>(0);
 
     return (
         <CreateContext.Provider
@@ -101,6 +120,10 @@ const CreateProvider = (props: { children: any }) => {
                 setAssetSend,
                 assetReceive,
                 setAssetReceive,
+                assetSelect,
+                setAssetSelect,
+                assetSelected,
+                setAssetSelected,
                 valid,
                 setValid,
                 invoiceValid,
@@ -117,6 +140,12 @@ const CreateProvider = (props: { children: any }) => {
                 setSendAmountFormatted,
                 receiveAmountFormatted,
                 setReceiveAmountFormatted,
+                amountChanged,
+                setAmountChanged,
+                minimum,
+                setMinimum,
+                maximum,
+                setMaximum,
             }}>
             {props.children}
         </CreateContext.Provider>

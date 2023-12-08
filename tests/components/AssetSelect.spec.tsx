@@ -3,7 +3,6 @@ import { describe, expect, test } from "vitest";
 
 import SelectAsset from "../../src/components/AssetSelect";
 import { BTC, LBTC, LN, sideReceive, sideSend } from "../../src/consts";
-// import * as signals from "../../src/signals";
 import { CreateProvider, useCreateContext } from "../../src/context/Create";
 import i18n from "../../src/i18n/i18n";
 
@@ -79,12 +78,13 @@ describe("AssetSelect", () => {
         signals.setAssetSelect(true);
 
         signals.setAssetSend(BTC);
+        signals.setAssetReceive(LN);
         signals.setAssetSelected(sideSend);
 
         fireEvent.click(await screen.findByTestId("select-BTC"));
 
-        expect(signals.assetReceive()).toEqual(LN);
         expect(signals.assetSend()).toEqual(BTC);
+        expect(signals.assetReceive()).toEqual(LN);
         expect(signals.assetSelected()).toEqual(sideSend);
     });
 

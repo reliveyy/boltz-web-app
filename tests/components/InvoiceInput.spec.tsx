@@ -2,17 +2,17 @@ import { fireEvent, render, screen } from "@solidjs/testing-library";
 import { describe, expect, test } from "vitest";
 
 import InvoiceInput from "../../src/components/InvoiceInput";
-import * as signals from "../../src/signals";
-import {
-    decodeInvoice,
-    extractInvoice,
-    invoicePrefix,
-} from "../../src/utils/invoice";
-
-// import * as signals from "../../src/signals";
-// import { decodeInvoice } from "../../src/utils/invoice";
+import { CreateProvider, useCreateContext } from "../../src/context/Create";
+import { decodeInvoice } from "../../src/utils/invoice";
 
 describe("InvoiceInput", () => {
+    let signals: any;
+
+    const TestComponent = () => {
+        signals = useCreateContext();
+        return "";
+    };
+
     test.each`
         expected | invoice
         ${false} | ${"m@some.domain"}
@@ -23,24 +23,31 @@ describe("InvoiceInput", () => {
         ${false} | ${"invalid"}
         ${false} | ${""}
     `("should validate invoice $invoice", async ({ expected, invoice }) => {
-        // setReverse(false);
+        render(() => (
+            <CreateProvider>
+                <TestComponent />
+                <InvoiceInput />
+            </CreateProvider>
+        ));
 
-        render(() => <InvoiceInput />);
+        signals.setReverse(false);
 
         fireEvent.input(await screen.findByTestId("invoice"), {
             target: { value: invoice },
         });
 
-        expect(true).toEqual(expected);
-        // expect(invoiceValid()).toEqual(expected);
+        expect(signals.invoiceValid()).toEqual(expected);
     });
 
     test("should set amount based on invoice", async () => {
-        // setReverse(false);
+        render(() => (
+            <CreateProvider>
+                <TestComponent />
+                <InvoiceInput />
+            </CreateProvider>
+        ));
 
-        // const setReceiveAmount = vi.spyOn(signals, "setReceiveAmount");
-
-        render(() => <InvoiceInput />);
+        signals.setReverse(false);
 
         const invoice =
             "lnbcrt235565340n1pjn87jmpp53jk5vw5z7n43wqyvv5ypma89xvkgahgdrvzxfn922485w2guxjasdqqcqzzsxqyz5vqsp5npwtpwa76526wcqxp66lzt43jdeqdxkud2j6ypjt2kyqscd6q4eq9qyyssquwlyf0vjsdyeck79mg5726llxxzv674xyr8ct5qgv28k62pmlr35kc2z8j96lc7ph403mgjxt9q8hzaeywmsrh4lg88uslyytvsnf5sp3lulnq";
@@ -48,17 +55,20 @@ describe("InvoiceInput", () => {
             target: { value: invoice },
         });
 
-        // expect(setReceiveAmount).toHaveBeenLastCalledWith(
-        //     decodeInvoice(invoice).satoshis,
-        // );
+        expect(signals.receiveAmount()).toEqual(
+            BigInt(decodeInvoice(invoice).satoshis),
+        );
     });
 
     test("should clear invoice on amount change", async () => {
-        // setReverse(false);
+        render(() => (
+            <CreateProvider>
+                <TestComponent />
+                <InvoiceInput />
+            </CreateProvider>
+        ));
 
-        render(() => <InvoiceInput />);
-
-        // const setInvoice = vi.spyOn(signals, "setInvoice");
+        signals.setReverse(false);
 
         const invoice =
             "lnbcrt235565340n1pjn87jmpp53jk5vw5z7n43wqyvv5ypma89xvkgahgdrvzxfn922485w2guxjasdqqcqzzsxqyz5vqsp5npwtpwa76526wcqxp66lzt43jdeqdxkud2j6ypjt2kyqscd6q4eq9qyyssquwlyf0vjsdyeck79mg5726llxxzv674xyr8ct5qgv28k62pmlr35kc2z8j96lc7ph403mgjxt9q8hzaeywmsrh4lg88uslyytvsnf5sp3lulnq";
@@ -67,13 +77,9 @@ describe("InvoiceInput", () => {
             target: { value: invoice },
         });
 
-        // expect(setInvoice).toHaveBeenCalledTimes(1);
-        // expect(setInvoice).toHaveBeenCalledWith(invoice);
-
-        // // setReceiveAmount(receiveAmount() + 1);
-
-        // expect(setInvoice).toHaveBeenCalledTimes(2);
-        // expect(setInvoice).toHaveBeenCalledWith("");
+        expect(signals.invoice()).toEqual(invoice);
+        signals.setReceiveAmount(signals.receiveAmount() + 1n);
+        expect(signals.invoice()).toEqual("");
     });
 
     test.each`
@@ -81,24 +87,26 @@ describe("InvoiceInput", () => {
         ${"m@some.domain"}
         ${"LNURL1DP68GURN8GHJ7MRWW4EXCTNDD93KSCT9DSCNQVF39ESHGTMPWP5J7MRWW4EXCUQGY84ZH"}
     `("should not clear lnurl $lnurl on amount change", async ({ lnurl }) => {
-        // setReverse(false);
+        render(() => (
+            <CreateProvider>
+                <TestComponent />
+                <InvoiceInput />
+            </CreateProvider>
+        ));
 
-        render(() => <InvoiceInput />);
+        signals.setReverse(false);
 
         const input = (await screen.findByTestId(
             "invoice",
         )) as HTMLTextAreaElement;
 
-        // const setLnurl = vi.spyOn(signals, "setLnurl");
-
         fireEvent.input(input, {
             target: { value: lnurl },
         });
 
-        expect(setLnurl).toHaveBeenCalledTimes(1);
-        expect(setLnurl).toHaveBeenCalledWith(lnurl.toLowerCase());
+        expect(signals.lnurl()).toEqual(lnurl);
 
-        // setSendAmount(sendAmount() + 1);
+        signals.setSendAmount(signals.sendAmount() + 1n);
 
         expect(input.value).toEqual(lnurl);
     });

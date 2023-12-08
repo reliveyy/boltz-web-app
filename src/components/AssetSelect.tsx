@@ -2,14 +2,21 @@ import { pairs } from "../config";
 import { useCreateContext } from "../context/Create";
 import { fetchPairs } from "../helper";
 import t from "../i18n";
-import { assetSelect, assetSelected, setAssetSelect } from "../signals";
 
 const assets = Object.keys(pairs).map((pair) => pair.split("/")[0]);
 assets.push(LN);
 
 const SelectAsset = () => {
-    const { assetReceive, setAssetReceive, assetSend, setAssetSend, setAsset } =
-        useCreateContext();
+    const {
+        assetSelected,
+        assetSelect,
+        setAssetSelect,
+        assetReceive,
+        setAssetReceive,
+        assetSend,
+        setAssetSend,
+        setAsset,
+    } = useCreateContext();
 
     const setSelectAsset = (isSend: boolean, asset: string) => {
         const setter = isSend ? setAssetSend : setAssetReceive;

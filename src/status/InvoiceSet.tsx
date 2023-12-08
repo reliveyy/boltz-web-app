@@ -48,7 +48,7 @@ const InvoiceSet = () => {
         <div>
             <h2>
                 {t("send_to", {
-                    amount: formatAmount(swap().expectedAmount),
+                    amount: formatAmount(swap().expectedAmount, denomination()),
                     denomination:
                         denomination() === denominations.sat
                             ? "sats"
@@ -78,7 +78,7 @@ const InvoiceSet = () => {
                     class="btn"
                     onclick={() =>
                         clipboard(
-                            formatAmount(swap().expectedAmount),
+                            formatAmount(swap().expectedAmount, denomination()),
                             t("copied"),
                         )
                     }>

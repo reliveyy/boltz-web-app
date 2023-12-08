@@ -1,6 +1,5 @@
-import { beforeAll, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 
-import { setDenomination, setMaximum } from "../../src/signals";
 import {
     calculateDigits,
     convertAmount,
@@ -41,8 +40,7 @@ describe("denomination utils", () => {
         `(
             "format $amount in $denomination",
             ({ denomination, amount, formatted }) => {
-                setDenomination(denomination);
-                expect(formatAmount(amount)).toEqual(formatted);
+                expect(formatAmount(amount, denomination)).toEqual(formatted);
             },
         );
     });
@@ -65,20 +63,13 @@ describe("denomination utils", () => {
         `(
             "calculate digits for $amount in $denomination",
             ({ denomination, digits, amount }) => {
-                setMaximum(amount);
-                setDenomination(denomination);
-                expect(calculateDigits()).toEqual(digits);
+                expect(calculateDigits(amount, denomination)).toEqual(digits);
             },
         );
     });
 
     describe("check paste validation regex", () => {
         const max = 100000000;
-
-        beforeAll(() => {
-            setMaximum(max);
-        });
-
         test.each`
             denomination         | amount                  | valid
             ${denominations.sat} | ${"123123"}             | ${true}
@@ -97,8 +88,7 @@ describe("denomination utils", () => {
         `(
             "validating regex for $amount in $denomination",
             ({ denomination, amount, valid }) => {
-                setDenomination(denomination);
-                let regex = getValidationRegex();
+                let regex = getValidationRegex(max, denomination);
                 expect(regex.test(amount)).toEqual(valid);
             },
         );

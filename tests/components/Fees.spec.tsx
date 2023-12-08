@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 
 import Fees from "../../src/components/Fees";
 import { CreateProvider, useCreateContext } from "../../src/context/Create";
-import { maximum, minimum, setConfig } from "../../src/signals";
+import { setConfig } from "../../src/signals";
 import { calculateSendAmount } from "../../src/utils/calculate";
 import { cfg } from "../config";
 
@@ -29,15 +29,15 @@ describe("Fees component", () => {
 
         const limits = cfg["BTC/BTC"].limits;
 
-        expect(minimum()).toEqual(limits.minimal);
-        expect(maximum()).toEqual(limits.maximal);
+        expect(signals.minimum()).toEqual(limits.minimal);
+        expect(signals.maximum()).toEqual(limits.maximal);
 
         signals.setReverse(false);
 
-        expect(minimum()).toEqual(
+        expect(signals.minimum()).toEqual(
             calculateSendAmount(limits.minimal, signals.reverse()),
         );
-        expect(maximum()).toEqual(
+        expect(signals.maximum()).toEqual(
             calculateSendAmount(limits.maximal, signals.reverse()),
         );
     });

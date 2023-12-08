@@ -22,7 +22,7 @@ const SwapCreated = () => {
         <div>
             <h2>
                 {t("pay_invoice_to", {
-                    amount: formatAmount(swap().sendAmount),
+                    amount: formatAmount(swap().sendAmount, denomination()),
                     denomination:
                         denomination() === denominations.sat ? "sats" : BTC,
                 })}

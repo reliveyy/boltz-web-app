@@ -12,9 +12,7 @@ import {
     minerFee,
     setBoltzFee,
     setDenomination,
-    setMaximum,
     setMinerFee,
-    setMinimum,
 } from "../signals";
 import {
     calculateBoltzFeeOnSend,
@@ -23,7 +21,8 @@ import {
 import { formatAmount } from "../utils/denomination";
 
 const Fees = () => {
-    const { asset, reverse, sendAmount } = useCreateContext();
+    const { asset, reverse, sendAmount, setMinimum, setMaximum } =
+        useCreateContext();
 
     createEffect(() => {
         const cfg = config()[`${asset()}/BTC`];
@@ -75,7 +74,7 @@ const Fees = () => {
             <label>
                 {t("network_fee")}:{" "}
                 <span class="network-fee">
-                    {formatAmount(minerFee(), true)}
+                    {formatAmount(minerFee(), denomination(), true)}
                     <span
                         class="denominator"
                         data-denominator={denomination()}></span>
@@ -88,6 +87,7 @@ const Fees = () => {
                             Number(sendAmount()),
                             reverse(),
                         ),
+                        denomination(),
                         true,
                     )}
                     <span

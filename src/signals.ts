@@ -1,12 +1,7 @@
 import { makePersisted } from "@solid-primitives/storage";
 import { createSignal } from "solid-js";
 
-import { sideSend } from "./consts";
 import { isMobile } from "./helper";
-
-// ui
-export const [assetSelect, setAssetSelect] = createSignal(false);
-export const [assetSelected, setAssetSelected] = createSignal(null);
 
 export const [config, setConfig] = createSignal({});
 
@@ -17,11 +12,8 @@ export const [webln, setWebln] = createSignal(false);
 // fees
 export const [boltzFee, setBoltzFee] = createSignal(0);
 export const [minerFee, setMinerFee] = createSignal(0);
-export const [minimum, setMinimum] = createSignal(0);
-export const [maximum, setMaximum] = createSignal(0);
 
 // swaps
-export const [amountChanged, setAmountChanged] = createSignal(sideSend);
 export const [refundAddress, setRefundAddress] = createSignal(null);
 export const [swap, setSwap] = createSignal(null, {
     // To allow updating properties of the swap object without replacing it completely

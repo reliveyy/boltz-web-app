@@ -12,18 +12,7 @@ import Reverse from "./components/Reverse";
 import { RBTC, sideReceive, sideSend } from "./consts";
 import { useCreateContext } from "./context/Create";
 import t from "./i18n";
-import {
-    amountChanged,
-    assetSelect,
-    assetSelected,
-    boltzFee,
-    denomination,
-    maximum,
-    minerFee,
-    minimum,
-    setAmountChanged,
-    webln,
-} from "./signals";
+import { boltzFee, denomination, minerFee, webln } from "./signals";
 import { calculateReceiveAmount, calculateSendAmount } from "./utils/calculate";
 import {
     calculateDigits,
@@ -57,6 +46,12 @@ const Create = () => {
         setSendAmountFormatted,
         setSendAmountValid,
         setValid,
+        assetSelect,
+        assetSelected,
+        amountChanged,
+        setAmountChanged,
+        minimum,
+        maximum,
     } = useCreateContext();
 
     const changeReceiveAmount = (evt: InputEvent) => {
@@ -99,7 +94,6 @@ const Create = () => {
     const validateInput = (evt: KeyboardEvent) => {
         const input = evt.currentTarget as HTMLInputElement;
         const keycode = evt.key;
-        debugger;
         const hasDot = input.value.includes(".");
         const regex = denomination() == "sat" || hasDot ? /[0-9]/ : /[0-9]|\./;
         if (!regex.test(keycode)) {
@@ -110,7 +104,7 @@ const Create = () => {
     const validatePaste = (evt: ClipboardEvent) => {
         const clipboardData = evt.clipboardData || globalThis.clipboardData;
         const pastedData = clipboardData.getData("Text").trim();
-        if (!getValidationRegex().test(pastedData)) {
+        if (!getValidationRegex(maximum(), denomination()).test(pastedData)) {
             evt.stopPropagation();
             evt.preventDefault();
         }
@@ -188,11 +182,15 @@ const Create = () => {
     createMemo(() => {
         const rAmount = Number(receiveAmount());
         if (rAmount > 0) {
-            setReceiveAmountFormatted(formatAmount(rAmount).toString());
+            setReceiveAmountFormatted(
+                formatAmount(rAmount, denomination()).toString(),
+            );
         }
         const sAmount = Number(sendAmount());
         if (sAmount > 0) {
-            setSendAmountFormatted(formatAmount(sAmount).toString());
+            setSendAmountFormatted(
+                formatAmount(sAmount, denomination()).toString(),
+            );
         }
     });
 
@@ -229,13 +227,13 @@ const Create = () => {
                 <span
                     class="btn-small btn-light"
                     onClick={() => setAmount(minimum())}>
-                    {formatAmount(minimum())}
+                    {formatAmount(minimum(), denomination())}
                 </span>{" "}
                 {t("max")}{" "}
                 <span
                     class="btn-small btn-light"
                     onClick={() => setAmount(maximum())}>
-                    {formatAmount(maximum())}
+                    {formatAmount(maximum(), denomination())}
                 </span>
             </p>
             <div class="icons">
@@ -246,7 +244,7 @@ const Create = () => {
                         autofocus
                         required
                         type="text"
-                        maxlength={calculateDigits()}
+                        maxlength={calculateDigits(maximum(), denomination())}
                         inputmode={
                             denomination() == "btc" ? "decimal" : "numeric"
                         }
@@ -265,7 +263,7 @@ const Create = () => {
                         ref={receiveAmountRef}
                         required
                         type="text"
-                        maxlength={calculateDigits()}
+                        maxlength={calculateDigits(maximum(), denomination())}
                         inputmode={
                             denomination() == "btc" ? "decimal" : "numeric"
                         }

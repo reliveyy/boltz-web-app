@@ -29,13 +29,13 @@ export const checkForFailed = (swapId: string, asset: string, data: any) => {
             getApiUrl("/getswaptransaction", asset),
             (data) => {
                 if (asset !== RBTC && !data.transactionHex) {
-                    log.error("no mempool tx found");
+                    return log.error("no mempool tx found");
                 }
                 if (!data.timeoutEta) {
-                    log.error("no timeout eta");
+                    return log.error("no timeout eta");
                 }
                 if (!data.timeoutBlockHeight) {
-                    log.error("no timeout blockheight");
+                    return log.error("no timeout blockheight");
                 }
                 const timestamp = data.timeoutEta * 1000;
                 const eta = new Date(timestamp);

@@ -55,7 +55,7 @@ const RefundCreate = ({ swap, refundValid }) => {
                 await refund(
                     swap(),
                     refundAddress(),
-                    data.tx,
+                    data.transactionHex,
                     data.timeoutBlockHeight,
                 );
             },

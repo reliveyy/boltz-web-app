@@ -37,7 +37,7 @@ const Refund = ({ swap }: { swap: Accessor<Record<string, any>> }) => {
     return (
         <>
             <h2>{t("refund")}</h2>
-            <RefundCreate swap={swap()} refundValid={valid} />
+            <RefundCreate swap={swap} refundValid={valid} />
         </>
     );
 };

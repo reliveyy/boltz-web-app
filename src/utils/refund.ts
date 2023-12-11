@@ -20,6 +20,7 @@ import {
     setSwaps,
     swaps,
 } from "../signals";
+import { swapStatusFailed } from "./swapStatus";
 
 const refundErrorResponseHandler = (error: any) => {
     console.log(error);
@@ -51,7 +52,7 @@ const refundErrorResponseHandler = (error: any) => {
 
 export async function getfeeestimation(asset: string) {
     return new Promise((resolve) => {
-        fetcher("/getfeeestimation", (data) => {
+        fetcher(getApiUrl("/getfeeestimation", asset), (data) => {
             log.debug("getfeeestimation: ", data);
             resolve(data[asset]);
         });
@@ -81,7 +82,7 @@ export async function refund(
         return false;
     }
     log.info("refunding swap: ", swap.id);
-    let [_, fees] = await Promise.all([setup(), getfeeestimation(swap)]);
+    let [_, fees] = await Promise.all([setup(), getfeeestimation(swap.asset)]);
 
     const Transaction = getTransaction(asset_name);
     const net = getNetwork(asset_name);
@@ -134,14 +135,14 @@ export async function refund(
                     const tmpSwaps = swaps();
                     const currentSwap = tmpSwaps.find((s) => s.id === swap.id);
                     currentSwap.refundTx = data.transactionId;
+                    currentSwap.status = swapStatusFailed.SwapRefunded;
                     setSwaps(tmpSwaps);
                     setSwap(currentSwap);
                     log.debug("current_swap", currentSwap);
                     log.debug("swaps", tmpSwaps);
-                } else {
-                    setRefundTx(data.transactionId);
                 }
 
+                setRefundTx(data.transactionId);
                 setNotificationType("success");
                 setNotification(t("broadcasted"));
             }

@@ -7,7 +7,6 @@ import t from "../i18n";
 import { setRefundAddress } from "../signals";
 import {
     refundAddress,
-    refundTx,
     setTimeoutBlockheight,
     setTimeoutEta,
     setTransactionToRefund,
@@ -90,7 +89,7 @@ const RefundCreate = ({ swap, refundValid }) => {
             <hr />
             <button
                 class="btn"
-                disabled={!(valid() && refundTx() === "")}
+                disabled={!(valid() && swap().refundTx === undefined)}
                 onClick={startRefund}>
                 {t("refund")}
             </button>

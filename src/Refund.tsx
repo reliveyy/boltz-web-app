@@ -160,7 +160,7 @@ const Refund = () => {
                     onChange={(e) => uploadChange(e)}
                 />
                 <RefundCreate swap={refundJson} refundValid={refundJsonValid} />
-                <Show when={refundTx() !== ""}>
+                <Show when={refundJson() !== null && refundTx() !== ""}>
                     <hr />
                     <p>{t("refunded")}</p>
                     <hr />

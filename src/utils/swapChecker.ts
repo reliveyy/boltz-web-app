@@ -4,7 +4,11 @@ import { createEffect, createSignal } from "solid-js";
 import { RBTC } from "../consts";
 import { fetcher, getApiUrl } from "../helper";
 import { swap, swaps } from "../signals";
-import { setTimeoutBlockheight, setTimeoutEta } from "../signals";
+import {
+    setTimeoutBlockheight,
+    setTimeoutEta,
+    setTransactionToRefund,
+} from "../signals";
 import { claim } from "./claim";
 import {
     checkClaimStatus,
@@ -42,6 +46,7 @@ export const checkForFailed = (swapId: string, asset: string, data: any) => {
                 log.debug("Timeout ETA: \n " + eta.toLocaleString(), timestamp);
                 setTimeoutEta(timestamp);
                 setTimeoutBlockheight(data.timeoutBlockHeight);
+                setTransactionToRefund(data.transaction);
             },
             {
                 id: swapId,

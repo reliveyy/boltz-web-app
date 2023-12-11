@@ -60,8 +60,6 @@ export const claim = async (swap: any, swapStatus: SwapStatusReverse) => {
         return log.debug("mempool tx hex not found");
     }
 
-    log.debug("mempool_tx", swapStatus.hex);
-
     const Transaction = getTransaction(asset_name);
     const net = getNetwork(asset_name);
     const assetHash = asset_name === "L-BTC" ? net.assetHash : undefined;
@@ -73,9 +71,7 @@ export const claim = async (swap: any, swapStatus: SwapStatusReverse) => {
     let private_key = ECPair.fromPrivateKey(
         Buffer.from(swap.privateKey, "hex"),
     );
-    log.debug("private_key: ", private_key);
     let preimage = Buffer.from(swap.preimage, "hex");
-    log.debug("preimage: ", preimage);
     const { script, blindingKey } = decodeAddress(
         asset_name,
         swap.onchainAddress,
@@ -96,7 +92,6 @@ export const claim = async (swap: any, swapStatus: SwapStatusReverse) => {
         assetHash,
         blindingKey,
     ).toHex();
-    log.debug("claim_tx", claimTransaction);
     fetcher(
         getApiUrl("/broadcasttransaction", swap.asset),
         (data) => {

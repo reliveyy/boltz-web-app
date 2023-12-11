@@ -4,6 +4,7 @@ import { createSignal } from "solid-js";
 import { isMobile } from "./helper";
 
 export const [config, setConfig] = createSignal({});
+export const [swapStatus, setSwapStatus] = createSignal(null);
 
 export const [online, setOnline] = createSignal(true);
 export const [wasmSupported, setWasmSupported] = createSignal(true);

@@ -12,7 +12,7 @@ import { refundTx, swaps } from "./signals";
 import {
     swapStatusFailed,
     swapStatusSuccess,
-    updateSwapStatus,
+    updateSwapStatusIfRefundable,
 } from "./utils/swapStatus";
 
 const refundJsonKeys = ["id", "asset", "privateKey", "redeemScript"];
@@ -111,7 +111,11 @@ const Refund = () => {
                     getApiUrl("/swapstatus", swap.asset),
                     (status) => {
                         if (
-                            !updateSwapStatus(swap.id, status.status) &&
+                            !updateSwapStatusIfRefundable(
+                                swap.id,
+                                swap.status,
+                                status.status,
+                            ) &&
                             Object.values(swapStatusFailed).includes(
                                 status.status,
                             )

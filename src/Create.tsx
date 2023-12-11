@@ -57,7 +57,7 @@ const Create = () => {
     const changeReceiveAmount = (evt: InputEvent) => {
         const target = evt.currentTarget as HTMLInputElement;
         const amount = target.value.trim();
-        const satAmount = convertAmount(Number(amount), denominations.sat);
+        const satAmount = convertAmount(Number(amount), denomination());
         const sendAmount = calculateSendAmount(satAmount, reverse());
         setAmountChanged(sideReceive);
         setReceiveAmount(BigInt(satAmount));
@@ -70,7 +70,7 @@ const Create = () => {
     const changeSendAmount = (evt: InputEvent) => {
         const target = evt.currentTarget as HTMLInputElement;
         const amount = target.value.trim();
-        const satAmount = convertAmount(Number(amount), denominations.sat);
+        const satAmount = convertAmount(Number(amount), denomination());
         const receiveAmount = calculateReceiveAmount(satAmount, reverse());
         setAmountChanged(sideSend);
         setSendAmount(BigInt(satAmount));

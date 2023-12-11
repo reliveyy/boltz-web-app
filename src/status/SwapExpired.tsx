@@ -10,6 +10,7 @@ import { fetcher, getApiUrl } from "../helper";
 import t from "../i18n";
 import {
     failureReason,
+    setFailureReason,
     setTimeoutEta,
     setTransactionToRefund,
     swap,
@@ -30,8 +31,10 @@ const SwapExpired = () => {
             {
                 id: swap().id,
             },
-            () => {
-                log.warn(`no swap transaction for: ${swap().id}`);
+            async (error) => {
+                const data = await error.json();
+                setFailureReason(data.error);
+                log.warn(`no swap transaction for: ${swap().id}`, data.error);
             },
         );
     });

@@ -1,6 +1,5 @@
 import { createEffect, on } from "solid-js";
 
-import { RBTC } from "../consts";
 import { useCreateContext } from "../context/Create";
 import t from "../i18n";
 import { denomination } from "../signals";
@@ -13,7 +12,6 @@ const InvoiceInput = () => {
     let inputRef: HTMLTextAreaElement;
 
     const {
-        asset,
         invoice,
         reverse,
         setInvoice,
@@ -54,8 +52,8 @@ const InvoiceInput = () => {
 
     createEffect(
         on([sendAmountValid, invoice], () => {
-            if (!reverse() && asset() !== RBTC) {
-                validate(inputRef);
+            if (!reverse()) {
+                validateAddress(inputRef);
             }
         }),
     );

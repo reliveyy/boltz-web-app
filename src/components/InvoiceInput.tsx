@@ -53,7 +53,7 @@ const InvoiceInput = () => {
     createEffect(
         on([sendAmountValid, invoice], () => {
             if (!reverse()) {
-                validateAddress(inputRef);
+                validate(inputRef);
             }
         }),
     );

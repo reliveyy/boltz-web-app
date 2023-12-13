@@ -3,7 +3,11 @@ import { describe, expect, test } from "vitest";
 
 import InvoiceInput from "../../src/components/InvoiceInput";
 import { CreateProvider, useCreateContext } from "../../src/context/Create";
-import { decodeInvoice } from "../../src/utils/invoice";
+import {
+    decodeInvoice,
+    extractInvoice,
+    invoicePrefix,
+} from "../../src/utils/invoice";
 
 describe("InvoiceInput", () => {
     let signals: any;
@@ -104,7 +108,7 @@ describe("InvoiceInput", () => {
             target: { value: lnurl },
         });
 
-        expect(signals.lnurl()).toEqual(lnurl);
+        expect(signals.lnurl()).toEqual(lnurl.toLowerCase());
 
         signals.setSendAmount(signals.sendAmount() + 1n);
 
@@ -115,21 +119,24 @@ describe("InvoiceInput", () => {
         const invoice =
             "lightning:lnbcrt235565340n1pjn87jmpp53jk5vw5z7n43wqyvv5ypma89xvkgahgdrvzxfn922485w2guxjasdqqcqzzsxqyz5vqsp5npwtpwa76526wcqxp66lzt43jdeqdxkud2j6ypjt2kyqscd6q4eq9qyyssquwlyf0vjsdyeck79mg5726llxxzv674xyr8ct5qgv28k62pmlr35kc2z8j96lc7ph403mgjxt9q8hzaeywmsrh4lg88uslyytvsnf5sp3lulnq";
 
-        setReverse(false);
+        signals.setReverse(false);
 
-        render(() => <InvoiceInput />);
+        render(() => (
+            <CreateProvider>
+                <TestComponent />
+                <InvoiceInput />
+            </CreateProvider>
+        ));
 
         const input = (await screen.findByTestId(
             "invoice",
         )) as HTMLTextAreaElement;
 
-        const setInvoice = vi.spyOn(signals, "setInvoice");
-
         fireEvent.input(input, {
             target: { value: invoice },
         });
 
-        expect(setInvoice).toHaveBeenCalledWith(extractInvoice(invoice));
+        expect(signals.invoice()).toEqual(extractInvoice(invoice));
     });
 
     test.each`
@@ -137,20 +144,23 @@ describe("InvoiceInput", () => {
         ${`${invoicePrefix}m@some.domain`}
         ${`${invoicePrefix}LNURL1DP68GURN8GHJ7MRWW4EXCTNDD93KSCT9DSCNQVF39ESHGTMPWP5J7MRWW4EXCUQGY84ZH`}
     `("should remove prefix of lnurl $lnurl", async ({ lnurl }) => {
-        setReverse(false);
+        signals.setReverse(false);
 
-        render(() => <InvoiceInput />);
+        render(() => (
+            <CreateProvider>
+                <TestComponent />
+                <InvoiceInput />
+            </CreateProvider>
+        ));
 
         const input = (await screen.findByTestId(
             "invoice",
         )) as HTMLTextAreaElement;
 
-        const setLnurl = vi.spyOn(signals, "setLnurl");
-
         fireEvent.input(input, {
             target: { value: lnurl },
         });
 
-        expect(setLnurl).toHaveBeenCalledWith(extractInvoice(lnurl));
+        expect(signals.lnurl()).toEqual(extractInvoice(lnurl));
     });
 });

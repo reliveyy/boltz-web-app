@@ -17,7 +17,6 @@ import { calculateReceiveAmount, calculateSendAmount } from "./utils/calculate";
 import {
     calculateDigits,
     convertAmount,
-    denominations,
     formatAmount,
     getValidationRegex,
 } from "./utils/denomination";

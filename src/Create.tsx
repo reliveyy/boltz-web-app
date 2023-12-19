@@ -128,7 +128,10 @@ const Create = () => {
 
         if (lessThanMin || amount > maximum()) {
             const params = {
-                amount: formatAmount(lessThanMin ? minimum() : maximum()),
+                amount: formatAmount(
+                    lessThanMin ? minimum() : maximum(),
+                    denomination(),
+                ),
                 denomination: denomination(),
             };
             const label = lessThanMin ? "minimum_amount" : "maximum_amount";
